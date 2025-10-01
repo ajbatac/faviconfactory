@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
-import { Crop, RotateCcw, ZoomIn, ZoomOut, Move, Palette, Eraser, Sparkles } from 'lucide-react';
+import { Crop, RotateCcw, ZoomIn, ZoomOut, Move, Palette, Eraser, Sparkles, Snowflake } from 'lucide-react';
 import FaviconPreview from './FaviconPreview';
 import AnimationStudio from './AnimationStudio';
+import { applySeasonalEffect, type SeasonalConfig } from '@/react-app/utils/seasonalEffects';
 
 interface ImageCropperProps {
   imageFile: File;
-  onCropComplete: (croppedImageData: string) => void;
+  onCropComplete: (croppedImageData: string, seasonal?: 'snow' | 'valentine' | 'halloween' | 'celebration' | null) => void;
   onAnimationComplete?: (animationData: any) => void;
   onBack: () => void;
 }
@@ -38,6 +39,8 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
   const [showChoiceScreen, setShowChoiceScreen] = useState(false);
   const [showAnimationStudio, setShowAnimationStudio] = useState(false);
   const [finalCroppedData, setFinalCroppedData] = useState<string>('');
+  const [seasonalEffect, setSeasonalEffect] = useState<'snow' | 'valentine' | 'halloween' | 'celebration' | null>(null);
+  const [seasonalPreviewData, setSeasonalPreviewData] = useState<string>('');
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -198,6 +201,26 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
     updatePreview();
   }, [scale, position, removeBackground, colorOverlay]);
 
+  // Generate seasonal preview when seasonal effect changes
+  useEffect(() => {
+    if (seasonalEffect && previewImageData) {
+      generateSeasonalPreview();
+    } else {
+      setSeasonalPreviewData('');
+    }
+  }, [seasonalEffect, previewImageData]);
+
+  const generateSeasonalPreview = async () => {
+    if (!seasonalEffect || !previewImageData) return;
+    
+    try {
+      const seasonalData = await applySeasonalEffect(previewImageData, seasonalEffect, 64);
+      setSeasonalPreviewData(seasonalData);
+    } catch (error) {
+      console.error('Error generating seasonal preview:', error);
+    }
+  };
+
   const processCrop = async () => {
     if (!imageRef.current || !canvasRef.current) return;
 
@@ -258,7 +281,17 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
       ctx.restore();
 
       // Convert to data URL
-      const croppedImageData = canvas.toDataURL('image/png');
+      let croppedImageData = canvas.toDataURL('image/png');
+      
+      // Apply seasonal effect if selected
+      if (seasonalEffect) {
+        try {
+          croppedImageData = await applySeasonalEffect(croppedImageData, seasonalEffect, 512);
+        } catch (error) {
+          console.error('Error applying seasonal effect:', error);
+        }
+      }
+      
       setFinalCroppedData(croppedImageData);
       
       // Show choice between static or animated
@@ -271,7 +304,7 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
   };
 
   const handleStaticGeneration = () => {
-    onCropComplete(finalCroppedData);
+    onCropComplete(finalCroppedData, seasonalEffect);
   };
 
   const handleAnimationGeneration = (animationData: any) => {
@@ -342,6 +375,17 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
             >
               <Palette className="w-4 h-4" />
               <span>Color</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('seasonal')}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-all ${
+                activeTab === 'seasonal' 
+                  ? 'bg-white shadow-sm text-blue-600' 
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              <Snowflake className="w-4 h-4" />
+              <span>Seasonal</span>
             </button>
           </div>
         </div>
@@ -587,32 +631,115 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
                 </div>
               )}
 
+              {/* Seasonal Effects Controls */}
+              {activeTab === 'seasonal' && (
+                <div className="bg-gray-50 rounded-lg p-4 space-y-4">
+                  <h3 className="font-semibold text-gray-900">Seasonal Effects</h3>
+                  <p className="text-sm text-gray-600">
+                    Add seasonal flair to your favicon with themed overlays and color effects.
+                  </p>
+                  
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-2">
+                      {[
+                        { type: 'snow', label: '❄️ Snow', description: 'Winter theme' },
+                        { type: 'valentine', label: '❤️ Valentine', description: 'Love theme' },
+                        { type: 'halloween', label: '🎃 Halloween', description: 'Spooky theme' },
+                        { type: 'celebration', label: '🎉 Celebration', description: 'Party theme' }
+                      ].map((effect) => (
+                        <button
+                          key={effect.type}
+                          onClick={() => setSeasonalEffect(effect.type as any)}
+                          className={`p-3 rounded-lg border-2 text-left transition-all ${
+                            seasonalEffect === effect.type
+                              ? 'border-blue-500 bg-blue-50 text-blue-700'
+                              : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                          }`}
+                        >
+                          <div className="font-medium text-sm">{effect.label}</div>
+                          <div className="text-xs text-gray-500">{effect.description}</div>
+                        </button>
+                      ))}
+                    </div>
+                    
+                    <button
+                      onClick={() => setSeasonalEffect(null)}
+                      className={`w-full p-3 rounded-lg border-2 text-center transition-all ${
+                        seasonalEffect === null
+                          ? 'border-gray-400 bg-gray-100 text-gray-700'
+                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      <div className="font-medium text-sm">No Seasonal Effect</div>
+                      <div className="text-xs text-gray-500">Clean, original design</div>
+                    </button>
+                  </div>
+
+                  {seasonalEffect && (
+                    <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                      <h4 className="font-medium text-blue-900 mb-2">Effect Preview</h4>
+                      <p className="text-sm text-blue-700">
+                        This effect will add a themed overlay and color filter to your favicon.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Live Preview */}
               {previewImageData && (
                 <div className="bg-gray-50 rounded-lg p-4">
                   <h3 className="font-semibold text-gray-900 mb-3">Live Preview</h3>
-                  <div className="flex items-center space-x-3">
-                    <div className="relative">
-                      <div 
-                        className="w-8 h-8 rounded border border-gray-300"
-                        style={{
-                          backgroundImage: `
-                            linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%, #f0f0f0),
-                            linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%, #f0f0f0)
-                          `,
-                          backgroundSize: '4px 4px',
-                          backgroundPosition: '0 0, 2px 2px',
-                          backgroundColor: '#ffffff'
-                        }}
-                      >
-                        <img 
-                          src={previewImageData} 
-                          alt="Preview" 
-                          className="w-full h-full object-cover rounded"
-                        />
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-3">
+                      <div className="relative">
+                        <div 
+                          className="w-8 h-8 rounded border border-gray-300"
+                          style={{
+                            backgroundImage: `
+                              linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%, #f0f0f0),
+                              linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%, #f0f0f0)
+                            `,
+                            backgroundSize: '4px 4px',
+                            backgroundPosition: '0 0, 2px 2px',
+                            backgroundColor: '#ffffff'
+                          }}
+                        >
+                          <img 
+                            src={previewImageData} 
+                            alt="Preview" 
+                            className="w-full h-full object-cover rounded"
+                          />
+                        </div>
                       </div>
+                      <span className="text-sm text-gray-600">Original</span>
                     </div>
-                    <span className="text-sm text-gray-600">16×16 preview</span>
+                    
+                    {seasonalPreviewData && (
+                      <div className="flex items-center space-x-3">
+                        <div className="relative">
+                          <div 
+                            className="w-8 h-8 rounded border border-gray-300"
+                            style={{
+                              backgroundImage: `
+                                linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%, #f0f0f0),
+                                linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%, #f0f0f0)
+                              `,
+                              backgroundSize: '4px 4px',
+                              backgroundPosition: '0 0, 2px 2px',
+                              backgroundColor: '#ffffff'
+                            }}
+                          >
+                            <img 
+                              src={seasonalPreviewData} 
+                              alt="Seasonal Preview" 
+                              className="w-full h-full object-cover rounded"
+                            />
+                          </div>
+                        </div>
+                        <span className="text-sm text-gray-600">With Seasonal Effect</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

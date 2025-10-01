@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { ArrowLeft, Download, Sparkles, Snowflake, Heart, Ghost, PartyPopper } from 'lucide-react';
+import { ArrowLeft, Download, Sparkles, Zap, RotateCw } from 'lucide-react';
+import { generateAnimatedSVG, downloadAnimatedSVG, generateMultipleSizes, type AnimationConfig } from '@/react-app/utils/svgAnimations';
 
 interface AnimationStudioProps {
   croppedImageData: string;
@@ -8,8 +9,7 @@ interface AnimationStudioProps {
 }
 
 export default function AnimationStudio({ croppedImageData, onAnimationComplete, onBack }: AnimationStudioProps) {
-  const [animationType, setAnimationType] = useState<'pulse' | 'rotate' | 'seasonal'>('pulse');
-  const [seasonalEffect, setSeasonalEffect] = useState<'snow' | 'valentine' | 'halloween' | 'celebration'>('snow');
+  const [animationType, setAnimationType] = useState<'pulse' | 'rotate'>('pulse');
   const [animationSpeed, setAnimationSpeed] = useState(2);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -17,11 +17,21 @@ export default function AnimationStudio({ croppedImageData, onAnimationComplete,
     setIsProcessing(true);
     
     try {
+      const animationConfig: AnimationConfig = {
+        type: animationType,
+        speed: animationSpeed,
+        baseImageData: croppedImageData
+      };
+      
+      // Generate animated SVG
+      const animatedSVG = generateAnimatedSVG(animationConfig);
+      
       const animationData = {
         type: animationType,
         speed: animationSpeed,
-        seasonalEffect: animationType === 'seasonal' ? seasonalEffect : null,
-        baseImage: croppedImageData
+        baseImage: croppedImageData,
+        animatedSVG: animatedSVG,
+        isAnimated: true
       };
       
       onAnimationComplete(animationData);
@@ -42,6 +52,46 @@ export default function AnimationStudio({ croppedImageData, onAnimationComplete,
     document.body.removeChild(link);
   };
 
+  const downloadAnimatedFavicon = () => {
+    const animationConfig: AnimationConfig = {
+      type: animationType,
+      speed: animationSpeed,
+      baseImageData: croppedImageData
+    };
+    
+    const animatedSVG = generateAnimatedSVG(animationConfig);
+    downloadAnimatedSVG(animatedSVG, `animated-favicon-${animationType}.svg`);
+  };
+
+  const downloadAllAnimatedSizes = () => {
+    const animationConfig: AnimationConfig = {
+      type: animationType,
+      speed: animationSpeed,
+      baseImageData: croppedImageData
+    };
+    
+    const svgMap = generateMultipleSizes(animationConfig);
+    
+    // Download each size with a delay
+    const sizes = [
+      { size: 16, filename: `animated-favicon-16x16.svg` },
+      { size: 32, filename: `animated-favicon-32x32.svg` },
+      { size: 48, filename: `animated-favicon-48x48.svg` },
+      { size: 180, filename: `animated-apple-touch-icon.svg` },
+      { size: 192, filename: `animated-android-chrome-192x192.svg` },
+      { size: 512, filename: `animated-android-chrome-512x512.svg` },
+    ];
+
+    sizes.forEach((item, index) => {
+      setTimeout(() => {
+        const svgContent = svgMap.get(item.size);
+        if (svgContent) {
+          downloadAnimatedSVG(svgContent, item.filename);
+        }
+      }, index * 200);
+    });
+  };
+
   return (
     <div className="bg-white rounded-2xl shadow-2xl overflow-hidden max-w-4xl mx-auto">
       <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-6 text-white">
@@ -55,7 +105,7 @@ export default function AnimationStudio({ croppedImageData, onAnimationComplete,
             </button>
             <div>
               <h2 className="text-2xl font-bold mb-1">Animation Studio</h2>
-              <p className="text-purple-100">Add life to your favicon with animations and effects</p>
+              <p className="text-purple-100">Add CSS animations to your favicon (pulse, rotate)</p>
             </div>
           </div>
           <div className="bg-white/20 p-3 rounded-full">
@@ -80,7 +130,7 @@ export default function AnimationStudio({ croppedImageData, onAnimationComplete,
                   }`}
                 >
                   <div className="flex items-center space-x-3">
-                    <div className="w-3 h-3 bg-purple-500 rounded-full animate-pulse"></div>
+                    <Zap className="w-5 h-5 text-purple-500" />
                     <div>
                       <div className="font-medium">Pulse Effect</div>
                       <div className="text-sm text-gray-600">Gentle breathing animation</div>
@@ -97,88 +147,23 @@ export default function AnimationStudio({ croppedImageData, onAnimationComplete,
                   }`}
                 >
                   <div className="flex items-center space-x-3">
-                    <div className="w-3 h-3 bg-blue-500 rounded-full animate-spin"></div>
+                    <RotateCw className="w-5 h-5 text-blue-500" />
                     <div>
                       <div className="font-medium">Rotation Effect</div>
                       <div className="text-sm text-gray-600">Smooth rotating animation</div>
                     </div>
                   </div>
                 </button>
-                
-                <button
-                  onClick={() => setAnimationType('seasonal')}
-                  className={`p-4 rounded-lg border-2 text-left transition-all ${
-                    animationType === 'seasonal'
-                      ? 'border-purple-500 bg-purple-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  <div className="flex items-center space-x-3">
-                    <Sparkles className="w-5 h-5 text-pink-500" />
-                    <div>
-                      <div className="font-medium">Seasonal Effects</div>
-                      <div className="text-sm text-gray-600">Holiday and celebration themes</div>
-                    </div>
-                  </div>
-                </button>
               </div>
             </div>
 
-            {/* Seasonal Effects */}
-            {animationType === 'seasonal' && (
-              <div>
-                <h4 className="text-lg font-semibold text-gray-900 mb-3">Choose Effect</h4>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    onClick={() => setSeasonalEffect('snow')}
-                    className={`p-3 rounded-lg border-2 text-center transition-all ${
-                      seasonalEffect === 'snow'
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <Snowflake className="w-6 h-6 mx-auto mb-1 text-blue-500" />
-                    <div className="text-sm font-medium">Snow</div>
-                  </button>
-                  
-                  <button
-                    onClick={() => setSeasonalEffect('valentine')}
-                    className={`p-3 rounded-lg border-2 text-center transition-all ${
-                      seasonalEffect === 'valentine'
-                        ? 'border-pink-500 bg-pink-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <Heart className="w-6 h-6 mx-auto mb-1 text-pink-500" />
-                    <div className="text-sm font-medium">Valentine</div>
-                  </button>
-                  
-                  <button
-                    onClick={() => setSeasonalEffect('halloween')}
-                    className={`p-3 rounded-lg border-2 text-center transition-all ${
-                      seasonalEffect === 'halloween'
-                        ? 'border-orange-500 bg-orange-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <Ghost className="w-6 h-6 mx-auto mb-1 text-orange-500" />
-                    <div className="text-sm font-medium">Halloween</div>
-                  </button>
-                  
-                  <button
-                    onClick={() => setSeasonalEffect('celebration')}
-                    className={`p-3 rounded-lg border-2 text-center transition-all ${
-                      seasonalEffect === 'celebration'
-                        ? 'border-yellow-500 bg-yellow-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <PartyPopper className="w-6 h-6 mx-auto mb-1 text-yellow-500" />
-                    <div className="text-sm font-medium">Celebration</div>
-                  </button>
-                </div>
-              </div>
-            )}
+            {/* Note about Seasonal Effects */}
+            <div className="p-4 bg-blue-50 rounded-lg">
+              <h4 className="font-medium text-blue-900 mb-2">💡 Pro Tip</h4>
+              <p className="text-sm text-blue-800">
+                For seasonal effects (snow, valentine, halloween, celebration), use the "Seasonal" tab in the main editor before coming here.
+              </p>
+            </div>
 
             {/* Animation Speed */}
             <div>
@@ -234,7 +219,6 @@ export default function AnimationStudio({ croppedImageData, onAnimationComplete,
                 <p className="text-sm text-gray-600 mt-4">
                   {animationType === 'pulse' && 'Gentle pulsing effect'}
                   {animationType === 'rotate' && 'Smooth rotation animation'}
-                  {animationType === 'seasonal' && `${seasonalEffect} seasonal effect`}
                 </p>
               </div>
             </div>
@@ -282,23 +266,54 @@ export default function AnimationStudio({ croppedImageData, onAnimationComplete,
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-center space-x-4 mt-8 pt-8 border-t border-gray-200">
-          <button
-            onClick={downloadStaticFavicon}
-            className="px-6 py-3 bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700 transition-colors flex items-center space-x-2"
-          >
-            <Download className="w-5 h-5" />
-            <span>Download Static</span>
-          </button>
+        <div className="space-y-4 mt-8 pt-8 border-t border-gray-200">
+          {/* Download Buttons */}
+          <div className="flex justify-center space-x-4">
+            <button
+              onClick={downloadStaticFavicon}
+              className="px-6 py-3 bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700 transition-colors flex items-center space-x-2"
+            >
+              <Download className="w-5 h-5" />
+              <span>Download Static PNG</span>
+            </button>
+            
+            <button
+              onClick={downloadAnimatedFavicon}
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center space-x-2"
+            >
+              <Sparkles className="w-5 h-5" />
+              <span>Download Animated SVG</span>
+            </button>
+          </div>
           
-          <button
-            onClick={handleCreateAnimation}
-            disabled={isProcessing}
-            className="px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-medium hover:shadow-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:transform-none flex items-center space-x-2"
-          >
-            <Sparkles className="w-5 h-5" />
-            <span>{isProcessing ? 'Creating...' : 'Create Animated Favicon'}</span>
-          </button>
+          {/* Download All Sizes */}
+          <div className="text-center">
+            <button
+              onClick={downloadAllAnimatedSizes}
+              className="px-8 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg font-medium hover:shadow-lg transition-all duration-200 transform hover:scale-105 flex items-center space-x-2 mx-auto"
+            >
+              <Download className="w-5 h-5" />
+              <span>Download All Animated Sizes</span>
+            </button>
+            <p className="text-gray-600 text-sm mt-2">
+              Downloads animated SVG favicons in all standard sizes
+            </p>
+          </div>
+          
+          {/* Generate Button */}
+          <div className="text-center">
+            <button
+              onClick={handleCreateAnimation}
+              disabled={isProcessing}
+              className="px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-medium hover:shadow-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:transform-none flex items-center space-x-2 mx-auto"
+            >
+              <Sparkles className="w-5 h-5" />
+              <span>{isProcessing ? 'Creating...' : 'Generate & Continue'}</span>
+            </button>
+            <p className="text-gray-600 text-sm mt-2">
+              Generate animated favicon and continue to results page
+            </p>
+          </div>
         </div>
       </div>
     </div>

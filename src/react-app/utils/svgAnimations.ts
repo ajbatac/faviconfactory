@@ -61,44 +61,6 @@ export function generateAnimatedSVG(config: AnimationConfig): string {
   return svg;
 }
 
-function generateAnimationCSS(type: 'pulse' | 'rotate', speed: number): string {
-  if (type === 'pulse') {
-    return `
-      .animated-favicon {
-        animation: pulse ${speed}s ease-in-out infinite;
-        transform-origin: center;
-      }
-      
-      @keyframes pulse {
-        0%, 100% { 
-          transform: scale(1);
-          opacity: 1;
-        }
-        50% { 
-          transform: scale(1.1);
-          opacity: 0.8;
-        }
-      }
-    `;
-  } else {
-    return `
-      .animated-favicon {
-        animation: rotate ${speed}s linear infinite;
-        transform-origin: center;
-      }
-      
-      @keyframes rotate {
-        from { 
-          transform: rotate(0deg);
-        }
-        to { 
-          transform: rotate(360deg);
-        }
-      }
-    `;
-  }
-}
-
 export function downloadAnimatedSVG(svgContent: string, filename: string = 'animated-favicon.svg'): void {
   const blob = new Blob([svgContent], { type: 'image/svg+xml' });
   const url = URL.createObjectURL(blob);

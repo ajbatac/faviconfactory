@@ -189,7 +189,7 @@ export default function Home() {
 
             {/* How to Use Guide */}
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 mb-12 max-w-4xl mx-auto shadow-lg">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">How to Use FaviCraft</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">How to Use FavIcon Factory</h2>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="text-center">
@@ -635,7 +635,7 @@ export default function Home() {
                             </div>
                             <div className="border-l-4 border-indigo-500 pl-4">
                               <h4 className="font-semibold text-gray-900">Is this tool free to use?</h4>
-                              <p className="text-sm text-gray-600 mt-1">Yes! FaviCraft is completely free to use. No registration or payment required.</p>
+                              <p className="text-sm text-gray-600 mt-1">Yes! FavIcon Factory is completely free to use. No registration or payment required.</p>
                             </div>
                           </div>
                         </div>
@@ -654,7 +654,7 @@ export default function Home() {
       <footer className="bg-white/50 backdrop-blur-sm border-t border-gray-200/50 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center text-gray-600">
-            <p>© 2024 FaviCraft. Generate beautiful favicons for your website.</p>
+            <p>© 2025 FavIcon Factory. Generate beautiful favicons for your website.</p>
           </div>
         </div>
       </footer>

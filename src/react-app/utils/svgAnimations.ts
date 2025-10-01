@@ -12,8 +12,7 @@ export function generateAnimatedSVG(config: AnimationConfig): string {
     ? baseImageData 
     : `data:image/png;base64,${baseImageData}`;
 
-  // Generate CSS animation based on type and speed
-  const animationCSS = generateAnimationCSS(type, speed);
+  // Generate CSS animation based on type and speed (kept via direct @keyframes)
   
   // Create SVG with embedded CSS animation
   const svg = `
@@ -178,3 +177,4 @@ function generateAnimatedSVGForSize(config: AnimationConfig, size: number): stri
 
   return svg;
 }
+

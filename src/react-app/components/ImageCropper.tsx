@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Crop, RotateCcw, ZoomIn, ZoomOut, Move, Palette, Eraser, Sparkles, Snowflake } from 'lucide-react';
 import FaviconPreview from './FaviconPreview';
 import AnimationStudio from './AnimationStudio';
-import { applySeasonalEffect, type SeasonalConfig } from '@/react-app/utils/seasonalEffects';
+import { applySeasonalEffect } from '@/react-app/utils/seasonalEffects';
 
 interface ImageCropperProps {
   imageFile: File;

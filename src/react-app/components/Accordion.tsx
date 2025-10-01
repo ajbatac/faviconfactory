@@ -351,3 +351,4 @@ export const TechnicalGuideAccordion = () => {
 
   return <Accordion items={items} allowMultiple={true} />;
 };
+

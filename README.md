@@ -1,4 +1,3 @@
-# faviconfactory
 # favicon.love
 
 Generate professional, modern favicons from any image — entirely client-side. favicon.love supports seasonal effects, color adjustments, background transparency, multi-size exports (PNG/ICO), and animated SVG favicons with speed control.

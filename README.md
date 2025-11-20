@@ -1,7 +1,7 @@
 # faviconfactory
-# FavIcon Factory
+# favicon.love
 
-Generate professional, modern favicons from any image — entirely client-side. FavIcon Factory supports seasonal effects, color adjustments, background transparency, multi-size exports (PNG/ICO), and animated SVG favicons with speed control.
+Generate professional, modern favicons from any image — entirely client-side. favicon.love supports seasonal effects, color adjustments, background transparency, multi-size exports (PNG/ICO), and animated SVG favicons with speed control.
 
 • Open Source • MIT License • By AJ Batac — Instagram: @ajbatac
 
@@ -152,7 +152,7 @@ MIT License. See LICENSE if present; otherwise this repository is licensed under
 
 ## Attribution
 
-FavIcon Factory — by AJ Batac
+favicon.love — by AJ Batac
 
 - Instagram: @ajbatac
 - Copyright © 2025

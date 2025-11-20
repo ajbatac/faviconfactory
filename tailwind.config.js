@@ -5,7 +5,11 @@ export default {
     "./src/react-app/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        sans: ['Ubuntu', 'sans-serif'],
+      },
+    },
   },
   plugins: [],
 };

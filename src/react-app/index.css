@@ -5,3 +5,9 @@
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
 }
+
+@layer base {
+  body {
+    @apply min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50;
+  }
+}

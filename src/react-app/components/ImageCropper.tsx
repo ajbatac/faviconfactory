@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
 import { Crop, RotateCcw, ZoomIn, ZoomOut, Move, Palette, Eraser, Sparkles, Snowflake } from 'lucide-react';
-import FaviconPreview from './FaviconPreview';
 import AnimationStudio from './AnimationStudio';
 import { applySeasonalEffect } from '@/react-app/utils/seasonalEffects';
 
@@ -28,6 +27,7 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDraggingImage, setIsDraggingImage] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [resizingHandle, setResizingHandle] = useState<'nw' | 'ne' | 'sw' | 'se' | null>(null);
   const [removeBackground, setRemoveBackground] = useState(false);
   const [colorOverlay, setColorOverlay] = useState<ColorOverlay>({
     enabled: false,
@@ -61,35 +61,43 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
         if (!container) return;
 
         const imgRect = img.getBoundingClientRect();
-        
+
         // Calculate initial crop area (square in center)
-        const size = Math.min(imgRect.width, imgRect.height) * 0.8;
-        const x = (imgRect.width - size) / 2;
-        const y = (imgRect.height - size) / 2;
-        
-        setCropArea({ x, y, width: size, height: size });
-        updatePreview();
+        // Calculate initial crop area (full image, corner to corner)
+        setCropArea({
+          x: 0,
+          y: 0,
+          width: imgRect.width,
+          height: imgRect.height
+        });
       };
     }
   }, [imageSrc]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (activeTab !== 'crop') return;
-    
+    if (activeTab !== 'crop' || resizingHandle) return;
+
     setIsDragging(true);
     const rect = containerRef.current?.getBoundingClientRect();
     if (!rect) return;
 
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    
+
     // Start new crop area
     setCropArea({ x, y, width: 0, height: 0 });
   };
 
+  const handleResizeStart = (e: React.MouseEvent, handle: 'nw' | 'ne' | 'sw' | 'se') => {
+    e.stopPropagation();
+    e.preventDefault();
+    setResizingHandle(handle);
+    setIsDragging(true);
+  };
+
   const handleImageMouseDown = (e: React.MouseEvent) => {
     if (activeTab !== 'position') return;
-    
+
     e.stopPropagation();
     setIsDraggingImage(true);
     setDragStart({
@@ -101,20 +109,63 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
   const handleMouseMove = (e: React.MouseEvent) => {
     if (isDragging && containerRef.current && activeTab === 'crop') {
       const rect = containerRef.current.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      
-      const width = x - cropArea.x;
-      const height = y - cropArea.y;
-      const size = Math.min(Math.abs(width), Math.abs(height));
-      
-      setCropArea(prev => ({
-        ...prev,
-        width: size,
-        height: size
-      }));
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
 
-      updatePreview();
+      if (resizingHandle) {
+        // Handle resizing
+        setCropArea(prev => {
+          let newX = prev.x;
+          let newY = prev.y;
+          let newWidth = prev.width;
+          let newHeight = prev.height;
+
+          // Calculate changes based on handle
+          if (resizingHandle === 'se') {
+            const delta = Math.max(mouseX - prev.x, mouseY - prev.y);
+            newWidth = delta;
+            newHeight = delta;
+          } else if (resizingHandle === 'sw') {
+            const rightEdge = prev.x + prev.width;
+            const delta = Math.max(rightEdge - mouseX, mouseY - prev.y);
+            newX = rightEdge - delta;
+            newWidth = delta;
+            newHeight = delta;
+          } else if (resizingHandle === 'ne') {
+            const bottomEdge = prev.y + prev.height;
+            const delta = Math.max(mouseX - prev.x, bottomEdge - mouseY);
+            newY = bottomEdge - delta;
+            newWidth = delta;
+            newHeight = delta;
+          } else if (resizingHandle === 'nw') {
+            const rightEdge = prev.x + prev.width;
+            const bottomEdge = prev.y + prev.height;
+            const delta = Math.max(rightEdge - mouseX, bottomEdge - mouseY);
+            newX = rightEdge - delta;
+            newY = bottomEdge - delta;
+            newWidth = delta;
+            newHeight = delta;
+          }
+
+          return {
+            x: newX,
+            y: newY,
+            width: Math.abs(newWidth),
+            height: Math.abs(newHeight)
+          };
+        });
+      } else {
+        // Handle creating new crop
+        const width = mouseX - cropArea.x;
+        const height = mouseY - cropArea.y;
+        const size = Math.min(Math.abs(width), Math.abs(height));
+
+        setCropArea(prev => ({
+          ...prev,
+          width: size,
+          height: size
+        }));
+      }
     }
 
     if (isDraggingImage && activeTab === 'position') {
@@ -122,13 +173,13 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
         x: e.clientX - dragStart.x,
         y: e.clientY - dragStart.y
       });
-      updatePreview();
     }
   };
 
   const handleMouseUp = () => {
     setIsDragging(false);
     setIsDraggingImage(false);
+    setResizingHandle(null);
   };
 
   const updatePreview = () => {
@@ -137,15 +188,15 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     const img = imageRef.current;
-    
+
     if (!ctx) return;
 
     canvas.width = 64;
     canvas.height = 64;
-    
+
     // Clear canvas
     ctx.clearRect(0, 0, 64, 64);
-    
+
     // Calculate source coordinates
     const imgRect = img.getBoundingClientRect();
     const scaleX = img.naturalWidth / imgRect.width;
@@ -187,19 +238,49 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
 
   const handleScaleChange = (newScale: number) => {
     setScale(Math.max(0.1, Math.min(5, newScale)));
-    updatePreview();
   };
 
   const resetPosition = () => {
     setPosition({ x: 0, y: 0 });
     setScale(1);
-    updatePreview();
+  };
+
+  const resetAll = () => {
+    if (!imageRef.current) return;
+
+    const img = imageRef.current;
+    const imgRect = img.getBoundingClientRect();
+
+    // Reset crop to full image
+    setCropArea({
+      x: 0,
+      y: 0,
+      width: imgRect.width,
+      height: imgRect.height
+    });
+
+    // Reset position & zoom
+    setPosition({ x: 0, y: 0 });
+    setScale(1);
+
+    // Reset effects
+    setRemoveBackground(false);
+    setColorOverlay({
+      enabled: false,
+      color: '#000000',
+      opacity: 0.5,
+      blendMode: 'multiply'
+    });
+    setSeasonalEffect(null);
+
+    // Reset active tab
+    setActiveTab('crop');
   };
 
   // Update preview when settings change
   useEffect(() => {
     updatePreview();
-  }, [scale, position, removeBackground, colorOverlay]);
+  }, [scale, position, removeBackground, colorOverlay, cropArea]);
 
   // Generate seasonal preview when seasonal effect changes
   useEffect(() => {
@@ -212,7 +293,7 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
 
   const generateSeasonalPreview = async () => {
     if (!seasonalEffect || !previewImageData) return;
-    
+
     try {
       const seasonalData = await applySeasonalEffect(previewImageData, seasonalEffect, 64);
       setSeasonalPreviewData(seasonalData);
@@ -225,12 +306,12 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
     if (!imageRef.current || !canvasRef.current) return;
 
     setIsProcessing(true);
-    
+
     try {
       const canvas = canvasRef.current;
       const ctx = canvas.getContext('2d');
       const img = imageRef.current;
-      
+
       if (!ctx) {
         console.error('Failed to get canvas context');
         setIsProcessing(false);
@@ -240,7 +321,7 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
       // Set canvas size to final favicon size
       canvas.width = 512;
       canvas.height = 512;
-      
+
       // Clear canvas
       ctx.clearRect(0, 0, 512, 512);
 
@@ -282,7 +363,7 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
 
       // Convert to data URL
       let croppedImageData = canvas.toDataURL('image/png');
-      
+
       // Apply seasonal effect if selected
       if (seasonalEffect) {
         try {
@@ -291,9 +372,9 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
           console.error('Error applying seasonal effect:', error);
         }
       }
-      
+
       setFinalCroppedData(croppedImageData);
-      
+
       // Show choice between static or animated
       setShowChoiceScreen(true);
     } catch (error) {
@@ -322,67 +403,71 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
               <h2 className="text-2xl font-bold text-gray-900 mb-1">Customize Your Favicon</h2>
               <p className="text-gray-600">Use the tools below to perfect your favicon</p>
             </div>
-            <button
-              onClick={onBack}
-              className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
-            >
-              <RotateCcw className="w-5 h-5" />
-            </button>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={resetAll}
+                className="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors flex items-center space-x-2"
+              >
+                <RotateCcw className="w-4 h-4" />
+                <span>Reset All</span>
+              </button>
+              <button
+                onClick={onBack}
+                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
+              >
+                Start Over
+              </button>
+            </div>
           </div>
 
           {/* Customization Tabs */}
           <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
             <button
               onClick={() => setActiveTab('crop')}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-all ${
-                activeTab === 'crop' 
-                  ? 'bg-white shadow-sm text-blue-600' 
-                  : 'text-gray-600 hover:text-gray-800'
-              }`}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-all ${activeTab === 'crop'
+                ? 'bg-white shadow-sm text-blue-600'
+                : 'text-gray-600 hover:text-gray-800'
+                }`}
             >
               <Crop className="w-4 h-4" />
               <span>Crop</span>
             </button>
             <button
               onClick={() => setActiveTab('position')}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-all ${
-                activeTab === 'position' 
-                  ? 'bg-white shadow-sm text-blue-600' 
-                  : 'text-gray-600 hover:text-gray-800'
-              }`}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-all ${activeTab === 'position'
+                ? 'bg-white shadow-sm text-blue-600'
+                : 'text-gray-600 hover:text-gray-800'
+                }`}
             >
               <Move className="w-4 h-4" />
               <span>Position & Zoom</span>
             </button>
             <button
               onClick={() => setActiveTab('background')}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-all ${
-                activeTab === 'background' 
-                  ? 'bg-white shadow-sm text-blue-600' 
-                  : 'text-gray-600 hover:text-gray-800'
-              }`}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-all ${activeTab === 'background'
+                ? 'bg-white shadow-sm text-blue-600'
+                : 'text-gray-600 hover:text-gray-800'
+                }`}
             >
               <Eraser className="w-4 h-4" />
               <span>Background</span>
             </button>
             <button
               onClick={() => setActiveTab('color')}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-all ${
-                activeTab === 'color' 
-                  ? 'bg-white shadow-sm text-blue-600' 
-                  : 'text-gray-600 hover:text-gray-800'
-              }`}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-all ${activeTab === 'color'
+                ? 'bg-white shadow-sm text-blue-600'
+                : 'text-gray-600 hover:text-gray-800'
+                }`}
             >
               <Palette className="w-4 h-4" />
               <span>Color</span>
             </button>
             <button
               onClick={() => setActiveTab('seasonal')}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-all ${
-                activeTab === 'seasonal' 
-                  ? 'bg-white shadow-sm text-blue-600' 
-                  : 'text-gray-600 hover:text-gray-800'
-              }`}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-all ${activeTab === 'seasonal'
+                ? 'bg-white shadow-sm text-blue-600'
+                : 'text-gray-600 hover:text-gray-800'
+                }`}
             >
               <Snowflake className="w-4 h-4" />
               <span>Seasonal</span>
@@ -397,10 +482,9 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
               <div className="relative bg-white rounded-lg border-2 border-gray-200 p-4 mx-auto" style={{ minHeight: '400px' }}>
                 <div
                   ref={containerRef}
-                  className={`relative inline-block select-none mx-auto rounded-lg overflow-hidden ${
-                    activeTab === 'crop' ? 'cursor-crosshair' : 
+                  className={`relative inline-block select-none mx-auto rounded-lg overflow-hidden ${activeTab === 'crop' ? 'cursor-crosshair' :
                     activeTab === 'position' ? 'cursor-move' : 'cursor-default'
-                  }`}
+                    }`}
                   style={{
                     backgroundImage: `
                       linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%, #f0f0f0),
@@ -431,7 +515,7 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
                         }}
                         onMouseDown={handleImageMouseDown}
                       />
-                      
+
                       {/* Color overlay */}
                       {colorOverlay.enabled && (
                         <div
@@ -445,7 +529,7 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
                           }}
                         />
                       )}
-                      
+
                       {/* Crop overlay */}
                       <div
                         className="absolute border-2 border-blue-500 bg-blue-500/10 pointer-events-none"
@@ -457,15 +541,75 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
                         }}
                       >
                         {/* Corner handles */}
-                        <div className="absolute -top-1 -left-1 w-3 h-3 bg-blue-500 border border-white"></div>
-                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 border border-white"></div>
-                        <div className="absolute -bottom-1 -left-1 w-3 h-3 bg-blue-500 border border-white"></div>
-                        <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-blue-500 border border-white"></div>
+                        <div
+                          className="absolute -top-1 -left-1 w-3 h-3 bg-blue-500 border border-white cursor-nw-resize pointer-events-auto"
+                          onMouseDown={(e) => handleResizeStart(e, 'nw')}
+                        ></div>
+                        <div
+                          className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 border border-white cursor-ne-resize pointer-events-auto"
+                          onMouseDown={(e) => handleResizeStart(e, 'ne')}
+                        ></div>
+                        <div
+                          className="absolute -bottom-1 -left-1 w-3 h-3 bg-blue-500 border border-white cursor-sw-resize pointer-events-auto"
+                          onMouseDown={(e) => handleResizeStart(e, 'sw')}
+                        ></div>
+                        <div
+                          className="absolute -bottom-1 -right-1 w-3 h-3 bg-blue-500 border border-white cursor-se-resize pointer-events-auto"
+                          onMouseDown={(e) => handleResizeStart(e, 'se')}
+                        ></div>
                       </div>
                     </>
                   )}
                 </div>
               </div>
+
+              {/* Continue Button */}
+              {!showAnimationStudio && !showChoiceScreen && (
+                <div className="flex justify-center mt-6">
+                  <button
+                    onClick={processCrop}
+                    disabled={isProcessing || cropArea.width === 0}
+                    className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-medium hover:shadow-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:transform-none flex items-center space-x-2"
+                  >
+                    <Crop className="w-5 h-5" />
+                    <span>{isProcessing ? 'Processing...' : 'Continue to Generation'}</span>
+                  </button>
+                </div>
+              )}
+
+              {/* Favicon Size Previews */}
+              {previewImageData && !showAnimationStudio && !showChoiceScreen && (
+                <div className="mt-6">
+                  <div className="grid grid-cols-4 gap-3">
+                    {[16, 32, 48, 64].map((size) => (
+                      <div key={size} className="flex flex-col items-center">
+                        <div
+                          className="w-full aspect-square border border-gray-200 rounded-lg p-4 flex items-center justify-center bg-white hover:border-gray-300 transition-colors"
+                          style={{
+                            backgroundImage: `
+                              linear-gradient(45deg, #fafafa 25%, transparent 25%, transparent 75%, #fafafa 75%, #fafafa),
+                              linear-gradient(45deg, #fafafa 25%, transparent 25%, transparent 75%, #fafafa 75%, #fafafa)
+                            `,
+                            backgroundSize: '8px 8px',
+                            backgroundPosition: '0 0, 4px 4px',
+                          }}
+                        >
+                          <img
+                            src={seasonalPreviewData || previewImageData}
+                            alt={`${size}x${size} preview`}
+                            className="object-contain"
+                            style={{
+                              width: `${Math.min(size, 48)}px`,
+                              height: `${Math.min(size, 48)}px`
+                            }}
+                          />
+                        </div>
+                        <span className="text-[10px] text-gray-400 font-medium mt-1.5">{size}×{size}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Controls Panel */}
@@ -489,7 +633,7 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
               {activeTab === 'position' && (
                 <div className="bg-gray-50 rounded-lg p-4 space-y-4">
                   <h3 className="font-semibold text-gray-900">Position & Zoom</h3>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Zoom: {scale.toFixed(1)}x
@@ -541,7 +685,7 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
               {activeTab === 'background' && (
                 <div className="bg-gray-50 rounded-lg p-4 space-y-4">
                   <h3 className="font-semibold text-gray-900">Background Options</h3>
-                  
+
                   <div className="flex items-center space-x-3">
                     <input
                       type="checkbox"
@@ -554,7 +698,7 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
                       Transparent Background
                     </label>
                   </div>
-                  
+
                   <p className="text-sm text-gray-600">
                     Enable transparent background for modern browsers and clean favicon appearance.
                   </p>
@@ -565,7 +709,7 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
               {activeTab === 'color' && (
                 <div className="bg-gray-50 rounded-lg p-4 space-y-4">
                   <h3 className="font-semibold text-gray-900">Color Effects</h3>
-                  
+
                   <div className="flex items-center space-x-3">
                     <input
                       type="checkbox"
@@ -638,7 +782,7 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
                   <p className="text-sm text-gray-600">
                     Add seasonal flair to your favicon with themed overlays and color effects.
                   </p>
-                  
+
                   <div className="space-y-3">
                     <div className="grid grid-cols-2 gap-2">
                       {[
@@ -650,25 +794,23 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
                         <button
                           key={effect.type}
                           onClick={() => setSeasonalEffect(effect.type as any)}
-                          className={`p-3 rounded-lg border-2 text-left transition-all ${
-                            seasonalEffect === effect.type
-                              ? 'border-blue-500 bg-blue-50 text-blue-700'
-                              : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                          }`}
+                          className={`p-3 rounded-lg border-2 text-left transition-all ${seasonalEffect === effect.type
+                            ? 'border-blue-500 bg-blue-50 text-blue-700'
+                            : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                            }`}
                         >
                           <div className="font-medium text-sm">{effect.label}</div>
                           <div className="text-xs text-gray-500">{effect.description}</div>
                         </button>
                       ))}
                     </div>
-                    
+
                     <button
                       onClick={() => setSeasonalEffect(null)}
-                      className={`w-full p-3 rounded-lg border-2 text-center transition-all ${
-                        seasonalEffect === null
-                          ? 'border-gray-400 bg-gray-100 text-gray-700'
-                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                      }`}
+                      className={`w-full p-3 rounded-lg border-2 text-center transition-all ${seasonalEffect === null
+                        ? 'border-gray-400 bg-gray-100 text-gray-700'
+                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                        }`}
                     >
                       <div className="font-medium text-sm">No Seasonal Effect</div>
                       <div className="text-xs text-gray-500">Clean, original design</div>
@@ -693,7 +835,7 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
                   <div className="space-y-3">
                     <div className="flex items-center space-x-3">
                       <div className="relative">
-                        <div 
+                        <div
                           className="w-8 h-8 rounded border border-gray-300"
                           style={{
                             backgroundImage: `
@@ -705,20 +847,20 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
                             backgroundColor: '#ffffff'
                           }}
                         >
-                          <img 
-                            src={previewImageData} 
-                            alt="Preview" 
+                          <img
+                            src={previewImageData}
+                            alt="Preview"
                             className="w-full h-full object-cover rounded"
                           />
                         </div>
                       </div>
                       <span className="text-sm text-gray-600">Original</span>
                     </div>
-                    
+
                     {seasonalPreviewData && (
                       <div className="flex items-center space-x-3">
                         <div className="relative">
-                          <div 
+                          <div
                             className="w-8 h-8 rounded border border-gray-300"
                             style={{
                               backgroundImage: `
@@ -730,9 +872,9 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
                               backgroundColor: '#ffffff'
                             }}
                           >
-                            <img 
-                              src={seasonalPreviewData} 
-                              alt="Seasonal Preview" 
+                            <img
+                              src={seasonalPreviewData}
+                              alt="Seasonal Preview"
                               className="w-full h-full object-cover rounded"
                             />
                           </div>
@@ -741,23 +883,68 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
                       </div>
                     )}
                   </div>
+
+                  {/* Chrome Preview */}
+                  <div className="mt-6 pt-6 border-t border-gray-200">
+                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Browser Preview</h4>
+                    <div className="bg-gray-200 p-3 rounded-xl">
+                      {/* Browser Window */}
+                      <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-300">
+                        {/* Tab Bar */}
+                        <div className="bg-[#dee1e6] px-2 pt-2 flex items-end space-x-1">
+                          {/* Active Tab */}
+                          <div className="bg-white rounded-t-lg px-3 py-2 flex items-center space-x-2 max-w-[180px] shadow-sm relative z-10 -mb-px">
+                            {/* Favicon */}
+                            <img
+                              src={seasonalPreviewData || previewImageData}
+                              alt="Favicon"
+                              className="w-4 h-4 object-contain"
+                            />
+                            <span className="text-xs text-gray-800 truncate flex-1 font-medium">New Tab</span>
+                            <div className="w-4 h-4 rounded-full hover:bg-gray-200 flex items-center justify-center cursor-pointer">
+                              <span className="text-[14px] leading-none text-gray-500">×</span>
+                            </div>
+                          </div>
+                          {/* Inactive Tab */}
+                          <div className="px-3 py-2 flex items-center space-x-2 opacity-60">
+                            <div className="w-4 h-4 bg-gray-400 rounded-full"></div>
+                            <span className="text-xs text-gray-600">Google</span>
+                          </div>
+                          <div className="flex-1"></div>
+                          <div className="px-2 pb-1">
+                            <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+                          </div>
+                        </div>
+                        {/* Address Bar Area */}
+                        <div className="bg-white p-2 border-b border-gray-200 flex items-center space-x-3">
+                          <div className="flex space-x-2 text-gray-400">
+                            <div className="w-5 h-5 rounded-full hover:bg-gray-100 flex items-center justify-center">←</div>
+                            <div className="w-5 h-5 rounded-full hover:bg-gray-100 flex items-center justify-center">→</div>
+                            <div className="w-5 h-5 rounded-full hover:bg-gray-100 flex items-center justify-center">↻</div>
+                          </div>
+                          <div className="flex-1 bg-gray-100 rounded-full px-4 py-1.5 text-xs text-gray-600 flex items-center group hover:bg-gray-200 transition-colors cursor-text">
+                            <span className="text-gray-400 mr-2">🔒</span>
+                            <span className="group-hover:text-gray-900">google.com</span>
+                          </div>
+                          <div className="w-6 h-6 rounded-full bg-purple-600 text-white text-xs flex items-center justify-center font-bold">
+                            A
+                          </div>
+                        </div>
+                        {/* Content Area Placeholder */}
+                        <div className="h-12 bg-white flex items-center justify-center border-t border-gray-100">
+                          <div className="flex flex-col items-center opacity-20">
+                            <div className="text-2xl font-bold text-gray-300">Google</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
           </div>
 
-          {!showAnimationStudio && !showChoiceScreen ? (
-            <div className="flex justify-center mt-8">
-              <button
-                onClick={processCrop}
-                disabled={isProcessing || cropArea.width === 0}
-                className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-medium hover:shadow-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:transform-none flex items-center space-x-2"
-              >
-                <Crop className="w-5 h-5" />
-                <span>{isProcessing ? 'Processing...' : 'Continue to Generation'}</span>
-              </button>
-            </div>
-          ) : null}
+
 
           {showChoiceScreen ? (
             <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-8 mt-8">
@@ -765,7 +952,7 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
                 <h3 className="text-2xl font-bold text-gray-900 mb-2">Choose Your Favicon Style</h3>
                 <p className="text-gray-600">Create a static favicon or add animations and effects</p>
               </div>
-              
+
               <div className="flex justify-center space-x-6">
                 <button
                   onClick={handleStaticGeneration}
@@ -777,7 +964,7 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
                     <div className="text-sm text-blue-200">Classic, fast-loading</div>
                   </div>
                 </button>
-                
+
                 <button
                   onClick={() => {
                     setShowChoiceScreen(false);
@@ -795,18 +982,11 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
             </div>
           ) : null}
         </div>
-
-        {/* Preview Section */}
-        {previewImageData && (
-          <div className="mt-8">
-            <FaviconPreview croppedImageData={previewImageData} />
-          </div>
-        )}
       </div>
 
       {/* Hidden canvas for processing */}
       <canvas ref={canvasRef} className="hidden" />
-      
+
       {/* Animation Studio Modal */}
       {showAnimationStudio && finalCroppedData && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">

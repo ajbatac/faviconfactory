@@ -39,7 +39,7 @@ export default function Accordion({ items, allowMultiple = false, className = ''
     <div className={`space-y-2 ${className}`}>
       {items.map((item) => {
         const isOpen = openItems.has(item.id);
-        
+
         return (
           <div key={item.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <button
@@ -62,12 +62,17 @@ export default function Accordion({ items, allowMultiple = false, className = ''
                 )}
               </div>
             </button>
-            
-            <div className={`transition-all duration-300 ease-in-out ${
-              isOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
-            } overflow-hidden`}>
-              <div className="px-6 pb-4">
-                {item.content}
+
+            <div
+              className="grid transition-all duration-300 ease-in-out"
+              style={{
+                gridTemplateRows: isOpen ? '1fr' : '0fr'
+              }}
+            >
+              <div className="overflow-hidden">
+                <div className="px-6 pb-4">
+                  {item.content}
+                </div>
               </div>
             </div>
           </div>
@@ -83,7 +88,6 @@ export const BestPracticesAccordion = () => {
     {
       id: 'dos',
       title: '✅ Best Practices - What to Do',
-      icon: <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center"><span className="text-green-600 font-bold">✓</span></div>,
       content: (
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -140,7 +144,6 @@ export const BestPracticesAccordion = () => {
     {
       id: 'donts',
       title: '❌ Common Mistakes - What to Avoid',
-      icon: <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center"><span className="text-red-600 font-bold">✗</span></div>,
       content: (
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -204,7 +207,6 @@ export const TechnicalGuideAccordion = () => {
     {
       id: 'sizes',
       title: '📐 Size Requirements & Specifications',
-      icon: <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center"><span className="text-blue-600 text-lg">📐</span></div>,
       content: (
         <div className="space-y-4">
           <div className="bg-blue-50 p-4 rounded-lg">
@@ -251,7 +253,6 @@ export const TechnicalGuideAccordion = () => {
     {
       id: 'formats',
       title: '🎨 File Formats & Browser Support',
-      icon: <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center"><span className="text-purple-600 text-lg">🎨</span></div>,
       content: (
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -310,7 +311,6 @@ export const TechnicalGuideAccordion = () => {
     {
       id: 'installation',
       title: '⚙️ Installation & Implementation',
-      icon: <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center"><span className="text-orange-600 text-lg">⚙️</span></div>,
       content: (
         <div className="space-y-4">
           <div className="bg-orange-50 p-4 rounded-lg">

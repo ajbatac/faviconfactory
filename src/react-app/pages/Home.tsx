@@ -133,25 +133,23 @@ export default function Home() {
       {/* Header */}
       <header className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <div className="text-center">
             <div className="flex justify-center mb-6">
-              <img
-                src="/favicon.love.logo.small.png"
-                alt="favicon.love logo"
-                className="h-auto"
-              />
+              {/* Chrome URL Address Bar Style Pill */}
+              <div className="inline-flex items-center gap-3 px-4 py-4 bg-white rounded-full border border-gray-200/50" style={{
+                boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.06), inset 0 -1px 2px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.05)'
+              }}>
+                <img
+                  src="/faviconlove.png"
+                  alt="favicon.love logo"
+                  className="h-12 w-auto"
+                />
+              </div>
             </div>
 
-            <h1 className="text-5xl font-bold text-gray-900 mb-4">
-              <span className="bg-gradient-to-r from-[#FF9500] to-[#FF2D55] bg-clip-text text-transparent font-bold">
-                favicon.love
-              </span>
-            </h1>
-
-            <p className="text-xl text-gray-600 mb-16 max-w-3xl mx-auto leading-relaxed">
-              Create professional favicons from any image with seasonal effects and animations.
-              Generate all standard formats including modern SVG animations.
+            <p className="text-lg text-gray-600 mb-16 max-w-3xl mx-auto leading-relaxed">
+              Transform any image into stunning, professional favicons in seconds with <span className="inline-flex items-center px-3 py-1 rounded-full bg-gradient-to-r from-[#FF9500] to-[#FF2D55] text-white font-semibold text-base">favicon.love</span>. Add seasonal flair, eye-catching animations, and generate every format your website needs—completely free, all in one place.
             </p>
 
             {currentStep === 'upload' && (

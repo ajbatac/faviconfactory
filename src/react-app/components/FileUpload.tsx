@@ -45,6 +45,7 @@ export default function FileUpload({ onFileSelect, isUploading }: FileUploadProp
         className={`
           relative rounded-2xl p-12 text-center transition-all duration-200
           ${isUploading ? 'opacity-50 pointer-events-none' : 'cursor-pointer'}
+          ${isDragOver ? 'shadow-2xl scale-[1.02]' : 'shadow-lg hover:shadow-xl'}
         `}
         style={{
           border: '2px dashed transparent',

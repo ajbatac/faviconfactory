@@ -149,7 +149,8 @@ export default function Home() {
             </div>
 
             <p className="text-lg text-gray-600 mb-16 max-w-3xl mx-auto leading-relaxed">
-              Transform any image into stunning, professional favicons in seconds with <span className="inline-flex items-center px-3 py-1 rounded-full bg-gradient-to-r from-[#FF9500] to-[#FF2D55] text-white font-semibold text-base">favicon.love</span>. Add seasonal flair, eye-catching animations, and generate every format your website needs—completely free, all in one place.
+              Transform any image into stunning, professional favicons in seconds with <span className="inline-flex items-center px-3 py-1 rounded-full bg-gradient-to-r from-[#FF9500] to-[#FF2D55] text-white font-semibold text-base">favicon.love</span>.
+              <br />Add seasonal flair, eye-catching animations, and generate every format your website needs, completely free, all in one place.
             </p>
 
             {currentStep === 'upload' && (

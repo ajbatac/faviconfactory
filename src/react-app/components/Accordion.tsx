@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, CheckCircle, XCircle, Ruler, FileImage, Settings, HelpCircle, AlertCircle, Upload } from 'lucide-react';
 
 interface AccordionItem {
   id: string;
@@ -82,265 +82,195 @@ export default function Accordion({ items, allowMultiple = false, className = ''
   );
 }
 
-// Pre-built accordion sections for common use cases
-export const BestPracticesAccordion = () => {
+// Unified Documentation Accordion
+export const DocumentationAccordion = () => {
   const items: AccordionItem[] = [
     {
-      id: 'dos',
-      title: '✅ Best Practices - What to Do',
+      id: 'best-practices',
+      title: 'Best Practices & Guidelines',
+      icon: <CheckCircle className="w-5 h-5 text-green-600" />,
       content: (
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-3">
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-                <div>
-                  <strong className="text-gray-900">Use high-contrast designs</strong>
-                  <p className="text-sm text-gray-600">Ensure your favicon is visible at 16x16 pixels</p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-                <div>
-                  <strong className="text-gray-900">Keep it simple</strong>
-                  <p className="text-sm text-gray-600">Avoid complex details that won't be visible at small sizes</p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-                <div>
-                  <strong className="text-gray-900">Use your brand colors</strong>
-                  <p className="text-sm text-gray-600">Maintain consistency with your website's color scheme</p>
-                </div>
-              </div>
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-green-50/50 p-5 rounded-xl border border-green-100">
+              <h4 className="font-bold text-green-900 mb-4 flex items-center gap-2">
+                <CheckCircle className="w-4 h-4" /> What to Do
+              </h4>
+              <ul className="space-y-3 text-sm text-gray-700">
+                <li className="flex items-start gap-2">
+                  <span className="w-1.5 h-1.5 bg-green-500 rounded-full mt-1.5 flex-shrink-0" />
+                  <span><strong>High Contrast:</strong> Ensure visibility at 16x16px</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="w-1.5 h-1.5 bg-green-500 rounded-full mt-1.5 flex-shrink-0" />
+                  <span><strong>Simplicity:</strong> Avoid complex details that blur at small sizes</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="w-1.5 h-1.5 bg-green-500 rounded-full mt-1.5 flex-shrink-0" />
+                  <span><strong>Brand Colors:</strong> Match your website's palette</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="w-1.5 h-1.5 bg-green-500 rounded-full mt-1.5 flex-shrink-0" />
+                  <span><strong>Small Files:</strong> Keep under 10KB for performance</span>
+                </li>
+              </ul>
             </div>
-            <div className="space-y-3">
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-                <div>
-                  <strong className="text-gray-900">Test across browsers</strong>
-                  <p className="text-sm text-gray-600">Check how your favicon looks in different browsers</p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-                <div>
-                  <strong className="text-gray-900">Use seasonal effects wisely</strong>
-                  <p className="text-sm text-gray-600">Update your favicon for holidays to keep it fresh</p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-green-500 rounded-full mt-2 flex-shrink-0"></div>
-                <div>
-                  <strong className="text-gray-900">Keep file sizes small</strong>
-                  <p className="text-sm text-gray-600">Under 10KB for faster loading and better performance</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )
-    },
-    {
-      id: 'donts',
-      title: '❌ Common Mistakes - What to Avoid',
-      content: (
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-3">
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-red-500 rounded-full mt-2 flex-shrink-0"></div>
-                <div>
-                  <strong className="text-gray-900">Don't use text</strong>
-                  <p className="text-sm text-gray-600">Text becomes unreadable at favicon sizes</p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-red-500 rounded-full mt-2 flex-shrink-0"></div>
-                <div>
-                  <strong className="text-gray-900">Avoid too many colors</strong>
-                  <p className="text-sm text-gray-600">Limit to 2-3 colors for better visibility</p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-red-500 rounded-full mt-2 flex-shrink-0"></div>
-                <div>
-                  <strong className="text-gray-900">Don't make it too busy</strong>
-                  <p className="text-sm text-gray-600">Complex designs become messy when scaled down</p>
-                </div>
-              </div>
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-red-500 rounded-full mt-2 flex-shrink-0"></div>
-                <div>
-                  <strong className="text-gray-900">Avoid low contrast</strong>
-                  <p className="text-sm text-gray-600">Light colors on light backgrounds are invisible</p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-red-500 rounded-full mt-2 flex-shrink-0"></div>
-                <div>
-                  <strong className="text-gray-900">Don't forget fallbacks</strong>
-                  <p className="text-sm text-gray-600">Always include ICO files for older browsers</p>
-                </div>
-              </div>
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 bg-red-500 rounded-full mt-2 flex-shrink-0"></div>
-                <div>
-                  <strong className="text-gray-900">Avoid copyrighted images</strong>
-                  <p className="text-sm text-gray-600">Use original designs or properly licensed content</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )
-    }
-  ];
 
-  return <Accordion items={items} allowMultiple={true} />;
-};
+            <div className="bg-red-50/50 p-5 rounded-xl border border-red-100">
+              <h4 className="font-bold text-red-900 mb-4 flex items-center gap-2">
+                <XCircle className="w-4 h-4" /> What to Avoid
+              </h4>
+              <ul className="space-y-3 text-sm text-gray-700">
+                <li className="flex items-start gap-2">
+                  <span className="w-1.5 h-1.5 bg-red-500 rounded-full mt-1.5 flex-shrink-0" />
+                  <span><strong>No Text:</strong> Text becomes unreadable at small sizes</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="w-1.5 h-1.5 bg-red-500 rounded-full mt-1.5 flex-shrink-0" />
+                  <span><strong>Too Many Colors:</strong> Limit to 2-3 for clarity</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="w-1.5 h-1.5 bg-red-500 rounded-full mt-1.5 flex-shrink-0" />
+                  <span><strong>Low Contrast:</strong> Light icons on light backgrounds disappear</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="w-1.5 h-1.5 bg-red-500 rounded-full mt-1.5 flex-shrink-0" />
+                  <span><strong>Copyrighted Images:</strong> Use original designs only</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 'technical-specs',
+      title: 'Technical Specifications',
+      icon: <Settings className="w-5 h-5 text-blue-600" />,
+      content: (
+        <div className="space-y-8">
+          {/* Sizes Table */}
+          <div>
+            <h4 className="font-bold text-gray-900 mb-3 flex items-center gap-2 text-sm uppercase tracking-wider">
+              <Ruler className="w-4 h-4 text-blue-500" /> Standard Sizes
+            </h4>
+            <div className="overflow-hidden rounded-xl border border-gray-200">
+              <table className="w-full text-sm text-left">
+                <thead className="bg-gray-50 text-gray-600 font-semibold">
+                  <tr>
+                    <th className="px-4 py-3">Size</th>
+                    <th className="px-4 py-3">Use Case</th>
+                    <th className="px-4 py-3">Device/Platform</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  <tr className="hover:bg-gray-50/50">
+                    <td className="px-4 py-2 font-mono text-blue-600">16×16</td>
+                    <td className="px-4 py-2">Browser Tabs</td>
+                    <td className="px-4 py-2 text-gray-500">Desktop Browsers</td>
+                  </tr>
+                  <tr className="hover:bg-gray-50/50">
+                    <td className="px-4 py-2 font-mono text-blue-600">32×32</td>
+                    <td className="px-4 py-2">Taskbar / Shortcuts</td>
+                    <td className="px-4 py-2 text-gray-500">Windows / Mac</td>
+                  </tr>
+                  <tr className="hover:bg-gray-50/50">
+                    <td className="px-4 py-2 font-mono text-blue-600">180×180</td>
+                    <td className="px-4 py-2">Home Screen Icon</td>
+                    <td className="px-4 py-2 text-gray-500">iOS (iPhone/iPad)</td>
+                  </tr>
+                  <tr className="hover:bg-gray-50/50">
+                    <td className="px-4 py-2 font-mono text-blue-600">192×192</td>
+                    <td className="px-4 py-2">Home Screen Icon</td>
+                    <td className="px-4 py-2 text-gray-500">Android Chrome</td>
+                  </tr>
+                  <tr className="hover:bg-gray-50/50">
+                    <td className="px-4 py-2 font-mono text-blue-600">512×512</td>
+                    <td className="px-4 py-2">App Store / PWA</td>
+                    <td className="px-4 py-2 text-gray-500">High-Res Displays</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
 
-export const TechnicalGuideAccordion = () => {
-  const items: AccordionItem[] = [
-    {
-      id: 'sizes',
-      title: '📐 Size Requirements & Specifications',
-      content: (
-        <div className="space-y-4">
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <h4 className="font-semibold text-blue-900 mb-3">Standard Favicon Sizes</h4>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-              <div className="flex justify-between">
-                <span className="text-blue-800">16×16px</span>
-                <span className="text-blue-600">Browser tabs</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-blue-800">32×32px</span>
-                <span className="text-blue-600">Desktop shortcuts</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-blue-800">48×48px</span>
-                <span className="text-blue-600">Windows taskbar</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-blue-800">180×180px</span>
-                <span className="text-blue-600">Apple touch icon</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-blue-800">192×192px</span>
-                <span className="text-blue-600">Android Chrome</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-blue-800">512×512px</span>
-                <span className="text-blue-600">High-res displays</span>
-              </div>
-            </div>
-          </div>
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <h4 className="font-semibold text-gray-900 mb-2">File Size Recommendations</h4>
-            <ul className="text-sm text-gray-700 space-y-1">
-              <li>• PNG files: Under 5KB for best performance</li>
-              <li>• ICO files: Under 10KB (contains multiple sizes)</li>
-              <li>• SVG files: Under 3KB for animations</li>
-              <li>• Total favicon package: Under 50KB</li>
-            </ul>
-          </div>
-        </div>
-      )
-    },
-    {
-      id: 'formats',
-      title: '🎨 File Formats & Browser Support',
-      content: (
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-green-50 p-4 rounded-lg">
-              <h4 className="font-semibold text-green-900 mb-2">PNG Format</h4>
-              <ul className="text-sm text-green-800 space-y-1">
-                <li>• Best for modern browsers</li>
-                <li>• Supports transparency</li>
-                <li>• High quality</li>
-                <li>• Universal support</li>
-              </ul>
-            </div>
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <h4 className="font-semibold text-blue-900 mb-2">ICO Format</h4>
-              <ul className="text-sm text-blue-800 space-y-1">
-                <li>• Legacy browser support</li>
-                <li>• Multiple sizes in one file</li>
-                <li>• Windows compatibility</li>
-                <li>• Fallback option</li>
-              </ul>
-            </div>
-            <div className="bg-purple-50 p-4 rounded-lg">
-              <h4 className="font-semibold text-purple-900 mb-2">SVG Format</h4>
-              <ul className="text-sm text-purple-800 space-y-1">
-                <li>• Scalable vector graphics</li>
-                <li>• Supports animations</li>
-                <li>• Modern browsers only</li>
-                <li>• Small file sizes</li>
-              </ul>
-            </div>
-          </div>
-          <div className="bg-yellow-50 p-4 rounded-lg">
-            <h4 className="font-semibold text-yellow-900 mb-2">Browser Compatibility</h4>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-              <div>
-                <strong className="text-yellow-800">Chrome</strong>
-                <p className="text-yellow-700">PNG, ICO, SVG ✅</p>
-              </div>
-              <div>
-                <strong className="text-yellow-800">Firefox</strong>
-                <p className="text-yellow-700">PNG, ICO, SVG ✅</p>
-              </div>
-              <div>
-                <strong className="text-yellow-800">Safari</strong>
-                <p className="text-yellow-700">PNG, ICO, SVG ✅</p>
-              </div>
-              <div>
-                <strong className="text-yellow-800">Edge</strong>
-                <p className="text-yellow-700">PNG, ICO, SVG ✅</p>
-              </div>
+          {/* Formats Table */}
+          <div>
+            <h4 className="font-bold text-gray-900 mb-3 flex items-center gap-2 text-sm uppercase tracking-wider">
+              <FileImage className="w-4 h-4 text-purple-500" /> File Formats
+            </h4>
+            <div className="overflow-hidden rounded-xl border border-gray-200">
+              <table className="w-full text-sm text-left">
+                <thead className="bg-gray-50 text-gray-600 font-semibold">
+                  <tr>
+                    <th className="px-4 py-3">Format</th>
+                    <th className="px-4 py-3">Best For</th>
+                    <th className="px-4 py-3">Key Features</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  <tr className="hover:bg-gray-50/50">
+                    <td className="px-4 py-2 font-bold text-gray-900">PNG</td>
+                    <td className="px-4 py-2">Modern Browsers</td>
+                    <td className="px-4 py-2 text-gray-500">Transparency, Lossless Quality</td>
+                  </tr>
+                  <tr className="hover:bg-gray-50/50">
+                    <td className="px-4 py-2 font-bold text-gray-900">ICO</td>
+                    <td className="px-4 py-2">Legacy Support</td>
+                    <td className="px-4 py-2 text-gray-500">Multi-size container, IE fallback</td>
+                  </tr>
+                  <tr className="hover:bg-gray-50/50">
+                    <td className="px-4 py-2 font-bold text-gray-900">SVG</td>
+                    <td className="px-4 py-2">Animations</td>
+                    <td className="px-4 py-2 text-gray-500">Vector scaling, CSS animations</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
       )
     },
     {
-      id: 'installation',
-      title: '⚙️ Installation & Implementation',
+      id: 'troubleshooting',
+      title: 'Troubleshooting & FAQ',
+      icon: <HelpCircle className="w-5 h-5 text-orange-500" />,
       content: (
-        <div className="space-y-4">
-          <div className="bg-orange-50 p-4 rounded-lg">
-            <h4 className="font-semibold text-orange-900 mb-3">Quick Setup Steps</h4>
-            <ol className="list-decimal list-inside space-y-2 text-sm text-orange-800">
-              <li><strong>Upload files</strong> to your website's root directory (same folder as index.html)</li>
-              <li><strong>Add HTML tags</strong> to your &lt;head&gt; section (code provided in results)</li>
-              <li><strong>Test locally</strong> by opening your HTML file in a browser</li>
-              <li><strong>Deploy</strong> to your web server and test in production</li>
-              <li><strong>Clear cache</strong> if favicon doesn't appear immediately</li>
-            </ol>
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 gap-4">
+            <div className="p-4 rounded-lg bg-gray-50 border border-gray-100">
+              <h4 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-orange-500" /> Favicon not showing?
+              </h4>
+              <ol className="list-decimal list-inside space-y-1 text-sm text-gray-700 ml-1">
+                <li><strong>Check Root:</strong> Ensure files are in the website root directory</li>
+                <li><strong>Clear Cache:</strong> Hard refresh (Ctrl+F5 or Cmd+Shift+R)</li>
+                <li><strong>Check HTML:</strong> Verify &lt;link&gt; tags in &lt;head&gt;</li>
+              </ol>
+            </div>
+
+            <div className="p-4 rounded-lg bg-gray-50 border border-gray-100">
+              <h4 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
+                <Upload className="w-4 h-4 text-blue-500" /> Upload Issues?
+              </h4>
+              <ul className="list-disc list-inside space-y-1 text-sm text-gray-700 ml-1">
+                <li><strong>Format:</strong> Use PNG, JPG, GIF, SVG, or WebP</li>
+                <li><strong>Size:</strong> Max 10MB file size</li>
+                <li><strong>Try:</strong> Refresh page or use a different browser</li>
+              </ul>
+            </div>
           </div>
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <h4 className="font-semibold text-gray-900 mb-2">Common Issues & Solutions</h4>
-            <div className="space-y-3 text-sm">
+
+          <div className="border-t border-gray-100 pt-6">
+            <h4 className="font-bold text-gray-900 mb-4 text-sm uppercase tracking-wider">Common Questions</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <strong className="text-gray-900">Favicon not showing:</strong>
-                <ul className="list-disc list-inside ml-4 mt-1 text-gray-700">
-                  <li>Check file paths are correct</li>
-                  <li>Clear browser cache (Ctrl+F5)</li>
-                  <li>Verify HTML syntax is correct</li>
-                </ul>
+                <p className="font-semibold text-gray-900 text-sm mb-1">Do I need all sizes?</p>
+                <p className="text-sm text-gray-600">Yes, to ensure your icon looks crisp on all devices (phones, tablets, desktops).</p>
               </div>
               <div>
-                <strong className="text-gray-900">Animation not working:</strong>
-                <ul className="list-disc list-inside ml-4 mt-1 text-gray-700">
-                  <li>Ensure you're using a modern browser</li>
-                  <li>Check SVG files are being served correctly</li>
-                  <li>Verify fallback ICO file is present</li>
-                </ul>
+                <p className="font-semibold text-gray-900 text-sm mb-1">Is it free?</p>
+                <p className="text-sm text-gray-600">Yes, 100% free for unlimited static and animated favicons.</p>
               </div>
             </div>
           </div>

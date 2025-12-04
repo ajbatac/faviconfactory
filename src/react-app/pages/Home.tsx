@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Zap, Star, Sparkles, Download, HelpCircle, BookOpen, Settings } from 'lucide-react';
+import { Zap, Star, Sparkles, Download, BookOpen, Settings, ArrowRight } from 'lucide-react';
 import FileUpload from '@/react-app/components/FileUpload';
 import ImageCropper from '@/react-app/components/ImageCropper';
+import Footer from '@/react-app/components/Footer';
 import { downloadAnimatedSVG, generateMultipleSizes, type AnimationConfig } from '@/react-app/utils/svgAnimations';
-import Accordion, { BestPracticesAccordion, TechnicalGuideAccordion } from '@/react-app/components/Accordion';
+import Accordion, { DocumentationAccordion } from '@/react-app/components/Accordion';
 
 type Step = 'upload' | 'crop' | 'results';
 
@@ -133,255 +134,268 @@ export default function Home() {
       {/* Header */}
       <header className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center">
-            <div className="flex justify-center mb-6">
+            <div className="flex flex-col items-center justify-center gap-6 mb-10">
               {/* Chrome URL Address Bar Style Pill */}
-              <div className="inline-flex items-center gap-3 px-4 py-4 bg-white rounded-full border border-gray-200/50" style={{
+              <div className="inline-flex items-center gap-3 px-4 py-3 bg-white rounded-full border border-gray-200/50" style={{
                 boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.06), inset 0 -1px 2px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.05)'
               }}>
                 <img
                   src="/faviconlove.png"
                   alt="favicon.love logo"
-                  className="h-12 w-auto"
+                  className="h-10 w-auto"
                 />
+              </div>
+
+              <div className="max-w-2xl mx-auto space-y-4">
+                <h1 className="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight">
+                  Professional favicons in seconds.
+                </h1>
+                <p className="text-lg text-gray-600 leading-relaxed max-w-xl mx-auto">
+                  Transform any image into stunning icons with seasonal flair and animations.
+                  <span className="block sm:inline"> Completely free, all in one place.</span>
+                </p>
               </div>
             </div>
+          </div>
 
-            <p className="text-lg text-gray-600 mb-16 max-w-3xl mx-auto leading-relaxed">
-              Transform any image into stunning, professional favicons in seconds with <span className="inline-flex items-center px-3 py-1 rounded-full bg-gradient-to-r from-[#FF9500] to-[#FF2D55] text-white font-semibold text-base">favicon.love</span>.
-              <br />Add seasonal flair, eye-catching animations, and generate every format your website needs, completely free, all in one place.
-            </p>
+          {/* Step Indicator */}
+          <div className="flex items-center justify-center space-x-2 md:space-x-4 mb-12">
+            {[
+              { id: 'upload', label: 'Upload' },
+              { id: 'crop', label: 'Crop & Customize' },
+              { id: 'results', label: 'Download' }
+            ].map((step, index) => {
+              const isActive = currentStep === step.id;
+              const isCompleted =
+                (currentStep === 'crop' && step.id === 'upload') ||
+                (currentStep === 'results' && (step.id === 'upload' || step.id === 'crop'));
 
-            {currentStep === 'upload' && (
-              <div className="mb-32">
-                <FileUpload
-                  onFileSelect={handleFileSelect}
-                  isUploading={false}
-                />
-              </div>
-            )}
+              return (
+                <div key={step.id} className="flex items-center">
+                  <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold transition-colors duration-200
+                      ${isActive ? 'bg-blue-600 text-white shadow-lg shadow-blue-200' :
+                      isCompleted ? 'bg-green-500 text-white' :
+                        'bg-gray-100 text-gray-400'}`}
+                  >
+                    {isCompleted ? (
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    ) : (
+                      index + 1
+                    )}
+                  </div>
+                  <span className={`ml-2 text-sm font-medium hidden md:block transition-colors duration-200
+                      ${isActive ? 'text-gray-900' : isCompleted ? 'text-green-600' : 'text-gray-400'}`}
+                  >
+                    {step.label}
+                  </span>
+                  {index < 2 && (
+                    <div className={`w-8 md:w-16 h-0.5 mx-2 md:mx-4 transition-colors duration-200
+                        ${isCompleted ? 'bg-green-500' : 'bg-gray-200'}`}
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          {currentStep === 'upload' && (
+            <div className="mb-20">
+              <FileUpload
+                onFileSelect={handleFileSelect}
+                isUploading={false}
+              />
+            </div>
+          )}
 
-            {currentStep === 'crop' && selectedFile && (
-              <div className="mb-32 text-left">
-                <ImageCropper
-                  imageFile={selectedFile}
-                  onCropComplete={handleCropComplete}
-                  onAnimationComplete={handleAnimationComplete}
-                  onBack={resetToUpload}
-                />
-              </div>
-            )}
+          {currentStep === 'crop' && selectedFile && (
+            <div className="mb-32 text-left">
+              <ImageCropper
+                imageFile={selectedFile}
+                onCropComplete={handleCropComplete}
+                onAnimationComplete={handleAnimationComplete}
+                onBack={resetToUpload}
+              />
+            </div>
+          )}
 
-            {currentStep === 'results' && faviconData && (
-              <div className="mb-32">
-                <div className="bg-white rounded-2xl shadow-xl overflow-hidden max-w-4xl mx-auto">
-                  <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-6 text-white">
-                    <div>
-                      <h2 className="text-3xl font-bold mb-2">Your Favicon Is Ready!</h2>
-                      <p className="text-green-100">
-                        {animationData?.isAnimated
-                          ? `Download your animated ${animationData.type} favicon files and add them to your website`
-                          : seasonalEffect
-                            ? `Download your ${seasonalEffect} themed favicon files and add them to your website`
-                            : 'Download your favicon files and add them to your website'
-                        }
-                      </p>
-                      <div className="mt-2 flex flex-wrap gap-2">
-                        {seasonalEffect && (
-                          <div className="px-3 py-1 bg-white/20 rounded-full text-sm">
-                            {seasonalEffect === 'snow' && '❄️ Winter Theme'}
-                            {seasonalEffect === 'valentine' && '❤️ Valentine Theme'}
-                            {seasonalEffect === 'halloween' && '🎃 Halloween Theme'}
-                            {seasonalEffect === 'celebration' && '🎉 Celebration Theme'}
+          {currentStep === 'results' && faviconData && (
+            <div className="mb-32">
+              <div className="bg-white rounded-2xl shadow-xl overflow-hidden max-w-4xl mx-auto">
+                <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-6 text-white">
+                  <div>
+                    <h2 className="text-3xl font-bold mb-2">Your Favicon Is Ready!</h2>
+                    <p className="text-green-100">
+                      {animationData?.isAnimated
+                        ? `Download your animated ${animationData.type} favicon files and add them to your website`
+                        : seasonalEffect
+                          ? `Download your ${seasonalEffect} themed favicon files and add them to your website`
+                          : 'Download your favicon files and add them to your website'
+                      }
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {seasonalEffect && (
+                        <div className="px-3 py-1 bg-white/20 rounded-full text-sm">
+                          {seasonalEffect === 'snow' && '❄️ Winter Theme'}
+                          {seasonalEffect === 'valentine' && '❤️ Valentine Theme'}
+                          {seasonalEffect === 'halloween' && '🎃 Halloween Theme'}
+                          {seasonalEffect === 'celebration' && '🎉 Celebration Theme'}
+                        </div>
+                      )}
+                      {animationData?.isAnimated && (
+                        <div className="px-3 py-1 bg-white/20 rounded-full text-sm">
+                          {animationData.type === 'pulse' && '💓 Pulse Animation'}
+                          {animationData.type === 'rotate' && '🔄 Rotation Animation'}
+                          <span className="ml-1">({animationData.speed}s)</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-8">
+                  {/* Preview */}
+                  <div className="text-center mb-8">
+                    <h3 className="text-lg font-bold text-gray-900 mb-3">Preview</h3>
+                    <div className="inline-block bg-gray-50 rounded-lg p-8">
+                      <div className="flex items-center justify-center space-x-6 mb-8">
+                        {[16, 32, 48, 64].map((size) => (
+                          <div key={size} className="text-center">
+                            <div
+                              className="border border-gray-300 rounded mb-2 mx-auto"
+                              style={{
+                                width: `${Math.min(size, 48)}px`,
+                                height: `${Math.min(size, 48)}px`,
+                                backgroundImage: `
+                                    linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%, #f0f0f0),
+                                    linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%, #f0f0f0)
+                                  `,
+                                backgroundSize: '4px 4px',
+                                backgroundPosition: '0 0, 2px 2px',
+                              }}
+                            >
+                              <img
+                                src={faviconData}
+                                alt={`${size}x${size} preview`}
+                                className="w-full h-full object-cover rounded"
+                              />
+                            </div>
+                            <div className="text-xs text-gray-600">{size}×{size}</div>
                           </div>
-                        )}
-                        {animationData?.isAnimated && (
-                          <div className="px-3 py-1 bg-white/20 rounded-full text-sm">
-                            {animationData.type === 'pulse' && '💓 Pulse Animation'}
-                            {animationData.type === 'rotate' && '🔄 Rotation Animation'}
-                            <span className="ml-1">({animationData.speed}s)</span>
+                        ))}
+                      </div>
+
+                      {/* Browser Preview */}
+                      <div className="bg-white rounded-lg shadow-md overflow-hidden max-w-md mx-auto">
+                        {/* Browser Tab Bar */}
+                        <div className="bg-gray-100 px-2 py-1 flex items-center gap-1 border-b border-gray-200">
+                          <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-t border-t border-x border-gray-200">
+                            <img
+                              src={faviconData}
+                              alt="favicon preview"
+                              className="w-4 h-4"
+                            />
+                            <span className="text-xs text-gray-700">favicon.love</span>
                           </div>
-                        )}
+                          <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-t">
+                            <div className="w-4 h-4 bg-gray-300 rounded-sm"></div>
+                            <span className="text-xs text-gray-400">New Tab</span>
+                          </div>
+                        </div>
+                        {/* Browser Content */}
+                        <div className="bg-white h-12 flex items-center justify-center">
+                          <span className="text-2xl font-bold text-gray-300">favicon.love</span>
+                        </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="p-8">
-                    {/* Preview */}
-                    <div className="text-center mb-8">
-                      <h3 className="text-lg font-bold text-gray-900 mb-3">Preview</h3>
-                      <div className="inline-block bg-gray-50 rounded-lg p-8">
-                        <div className="flex items-center justify-center space-x-6 mb-8">
-                          {[16, 32, 48, 64].map((size) => (
-                            <div key={size} className="text-center">
-                              <div
-                                className="border border-gray-300 rounded mb-2 mx-auto"
-                                style={{
-                                  width: `${Math.min(size, 48)}px`,
-                                  height: `${Math.min(size, 48)}px`,
-                                  backgroundImage: `
-                                    linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%, #f0f0f0),
-                                    linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%, #f0f0f0)
-                                  `,
-                                  backgroundSize: '4px 4px',
-                                  backgroundPosition: '0 0, 2px 2px',
-                                }}
-                              >
-                                <img
-                                  src={faviconData}
-                                  alt={`${size}x${size} preview`}
-                                  className="w-full h-full object-cover rounded"
-                                />
-                              </div>
-                              <div className="text-xs text-gray-600">{size}×{size}</div>
-                            </div>
-                          ))}
-                        </div>
-
-                        {/* Browser Preview */}
-                        <div className="bg-white rounded-lg shadow-md overflow-hidden max-w-md mx-auto">
-                          {/* Browser Tab Bar */}
-                          <div className="bg-gray-100 px-2 py-1 flex items-center gap-1 border-b border-gray-200">
-                            <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-t border-t border-x border-gray-200">
-                              <img
-                                src={faviconData}
-                                alt="favicon preview"
-                                className="w-4 h-4"
-                              />
-                              <span className="text-xs text-gray-700">favicon.love</span>
-                            </div>
-                            <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-t">
-                              <div className="w-4 h-4 bg-gray-300 rounded-sm"></div>
-                              <span className="text-xs text-gray-400">New Tab</span>
-                            </div>
-                          </div>
-                          {/* Browser Content */}
-                          <div className="bg-white h-12 flex items-center justify-center">
-                            <span className="text-2xl font-bold text-gray-300">favicon.love</span>
-                          </div>
-                        </div>
+                  {/* Download Options */}
+                  <div className="space-y-6">
+                    <div className="text-center space-y-4">
+                      {/* Static Download */}
+                      <div>
+                        <button
+                          onClick={downloadAllSizes}
+                          className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-bold text-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 flex items-center space-x-3 mx-auto"
+                        >
+                          <Download className="w-6 h-6" />
+                          <span>Download Static Favicons</span>
+                        </button>
+                        <p className="text-gray-600 text-sm mt-2">
+                          Downloads static PNG/ICO files (16×16, 32×32, 48×48, 180×180, 192×192, 512×512, favicon.ico)
+                        </p>
                       </div>
-                    </div>
 
-                    {/* Download Options */}
-                    <div className="space-y-6">
-                      <div className="text-center space-y-4">
-                        {/* Static Download */}
+                      {/* Animated Download */}
+                      {animationData?.isAnimated && (
                         <div>
                           <button
-                            onClick={downloadAllSizes}
-                            className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-bold text-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 flex items-center space-x-3 mx-auto"
+                            onClick={downloadAllAnimatedSizes}
+                            className="px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg font-bold text-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 flex items-center space-x-3 mx-auto"
                           >
-                            <Download className="w-6 h-6" />
-                            <span>Download Static Favicons</span>
+                            <Sparkles className="w-6 h-6" />
+                            <span>Download Animated SVG Favicons</span>
                           </button>
                           <p className="text-gray-600 text-sm mt-2">
-                            Downloads static PNG/ICO files (16×16, 32×32, 48×48, 180×180, 192×192, 512×512, favicon.ico)
+                            Downloads animated SVG files with {animationData.type} effect ({animationData.speed}s speed)
                           </p>
                         </div>
-
-                        {/* Animated Download */}
-                        {animationData?.isAnimated && (
-                          <div>
-                            <button
-                              onClick={downloadAllAnimatedSizes}
-                              className="px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg font-bold text-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 flex items-center space-x-3 mx-auto"
-                            >
-                              <Sparkles className="w-6 h-6" />
-                              <span>Download Animated SVG Favicons</span>
-                            </button>
-                            <p className="text-gray-600 text-sm mt-2">
-                              Downloads animated SVG files with {animationData.type} effect ({animationData.speed}s speed)
-                            </p>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        {(() => {
-                          const seasonalPrefix = seasonalEffect ? `${seasonalEffect}-` : '';
-                          return [
-                            { size: 16, filename: `${seasonalPrefix}favicon-16x16.png`, label: '16×16 PNG' },
-                            { size: 32, filename: `${seasonalPrefix}favicon-32x32.png`, label: '32×32 PNG' },
-                            { size: 48, filename: `${seasonalPrefix}favicon-48x48.png`, label: '48×48 PNG' },
-                            { size: 180, filename: `${seasonalPrefix}apple-touch-icon.png`, label: 'Apple Touch Icon' },
-                            { size: 192, filename: `${seasonalPrefix}android-chrome-192x192.png`, label: 'Android Chrome 192×192' },
-                            { size: 512, filename: `${seasonalPrefix}android-chrome-512x512.png`, label: 'Android Chrome 512×512' },
-                          ].map((item) => (
-                            <button
-                              key={item.size}
-                              onClick={() => downloadFavicon(item.size, item.filename)}
-                              className="p-3 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium transition-colors text-center"
-                            >
-                              {item.label}
-                            </button>
-                          ));
-                        })()}
-                      </div>
+                      )}
                     </div>
 
-                    {/* Installation Instructions */}
-                    <div className="mt-12 space-y-6">
-                      <div>
-                        <h3 className="text-xl font-bold text-gray-900 mb-4">Installation Instructions</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {(() => {
+                        const seasonalPrefix = seasonalEffect ? `${seasonalEffect}-` : '';
+                        return [
+                          { size: 16, filename: `${seasonalPrefix}favicon-16x16.png`, label: '16×16 PNG' },
+                          { size: 32, filename: `${seasonalPrefix}favicon-32x32.png`, label: '32×32 PNG' },
+                          { size: 48, filename: `${seasonalPrefix}favicon-48x48.png`, label: '48×48 PNG' },
+                          { size: 180, filename: `${seasonalPrefix}apple-touch-icon.png`, label: 'Apple Touch Icon' },
+                          { size: 192, filename: `${seasonalPrefix}android-chrome-192x192.png`, label: 'Android Chrome 192×192' },
+                          { size: 512, filename: `${seasonalPrefix}android-chrome-512x512.png`, label: 'Android Chrome 512×512' },
+                        ].map((item) => (
+                          <button
+                            key={item.size}
+                            onClick={() => downloadFavicon(item.size, item.filename)}
+                            className="p-3 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium transition-colors text-center"
+                          >
+                            {item.label}
+                          </button>
+                        ));
+                      })()}
+                    </div>
+                  </div>
 
-                        <div className="space-y-6">
-                          <div className="bg-blue-50 p-6 rounded-lg">
-                            <h4 className="font-semibold text-blue-900 mb-3 text-base">Quick Setup Guide</h4>
-                            <ol className="list-decimal list-inside space-y-2 text-sm text-blue-800">
-                              <li><strong>Upload Files:</strong> Place all downloaded favicon files in your website's root directory (same folder as index.html)</li>
-                              <li><strong>Add HTML Tags:</strong> Copy the code below into your HTML &lt;head&gt; section</li>
-                              <li><strong>Test:</strong> Refresh your browser and check if the favicon appears in the tab</li>
-                              <li><strong>Clear Cache:</strong> If you don't see changes, try hard refresh (Ctrl+F5 or Cmd+Shift+R)</li>
-                            </ol>
-                          </div>
+                  {/* Installation Instructions */}
+                  <div className="mt-12 space-y-6">
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900 mb-4">Installation Instructions</h3>
 
-                          <div>
-                            <p className="font-semibold text-gray-900 mb-3">HTML Code to Add:</p>
-                            <p className="text-sm text-gray-600 mb-2">Copy and paste this into your &lt;head&gt; section:</p>
-                            <div className="relative bg-black border-2 border-[#33ff33] rounded p-4 overflow-x-auto">
-                              <button
-                                onClick={() => {
-                                  const seasonalPrefix = seasonalEffect ? `${seasonalEffect}-` : '';
-                                  const animatedPrefix = animationData?.isAnimated ? 'animated-' : '';
-                                  let code = '';
-                                  if (animationData?.isAnimated) {
-                                    code = `<!-- Animated SVG Favicons -->
-<link rel="icon" type="image/svg+xml" href="/${animatedPrefix}favicon-32x32.svg">
-<link rel="icon" type="image/svg+xml" sizes="16x16" href="/${animatedPrefix}favicon-16x16.svg">
-<link rel="icon" type="image/svg+xml" sizes="32x32" href="/${animatedPrefix}favicon-32x32.svg">
-<link rel="icon" type="image/svg+xml" sizes="48x48" href="/${animatedPrefix}favicon-48x48.svg">
-<link rel="apple-touch-icon" href="/${animatedPrefix}apple-touch-icon.svg">
-<link rel="icon" type="image/svg+xml" sizes="192x192" href="/${animatedPrefix}android-chrome-192x192.svg">
-<link rel="icon" type="image/svg+xml" sizes="512x512" href="/${animatedPrefix}android-chrome-512x512.svg">
+                      <div className="space-y-6">
+                        <div className="bg-blue-50 p-6 rounded-lg">
+                          <h4 className="font-semibold text-blue-900 mb-3 text-base">Quick Setup Guide</h4>
+                          <ol className="list-decimal list-inside space-y-2 text-sm text-blue-800">
+                            <li><strong>Upload Files:</strong> Place all downloaded favicon files in your website's root directory (same folder as index.html)</li>
+                            <li><strong>Add HTML Tags:</strong> Copy the code below into your HTML &lt;head&gt; section</li>
+                            <li><strong>Test:</strong> Refresh your browser and check if the favicon appears in the tab</li>
+                            <li><strong>Clear Cache:</strong> If you don't see changes, try hard refresh (Ctrl+F5 or Cmd+Shift+R)</li>
+                          </ol>
+                        </div>
 
-<!-- Fallback for older browsers -->
-<link rel="icon" href="/${seasonalPrefix}favicon.ico" sizes="32x32">`;
-                                  } else {
-                                    code = `<link rel="icon" href="/${seasonalPrefix}favicon.ico" sizes="32x32">
-<link rel="icon" type="image/png" sizes="16x16" href="/${seasonalPrefix}favicon-16x16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/${seasonalPrefix}favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="48x48" href="/${seasonalPrefix}favicon-48x48.png">
-<link rel="apple-touch-icon" href="/${seasonalPrefix}apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="192x192" href="/${seasonalPrefix}android-chrome-192x192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="/${seasonalPrefix}android-chrome-512x512.png">`;
-                                  }
-                                  navigator.clipboard.writeText(code);
-                                }}
-                                className="absolute top-2 right-2 p-2 bg-[#33ff33]/10 hover:bg-[#33ff33]/20 border border-[#33ff33] rounded transition-colors"
-                                title="Copy to clipboard"
-                              >
-                                <svg className="w-4 h-4 text-[#33ff33]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                </svg>
-                              </button>
-                              <pre className="text-[#33ff33] text-xs" style={{ fontFamily: 'Courier, monospace' }}>{(() => {
+                        <div>
+                          <p className="font-semibold text-gray-900 mb-3">HTML Code to Add:</p>
+                          <p className="text-sm text-gray-600 mb-2">Copy and paste this into your &lt;head&gt; section:</p>
+                          <div className="relative bg-black border-2 border-[#33ff33] rounded p-4 overflow-x-auto">
+                            <button
+                              onClick={() => {
                                 const seasonalPrefix = seasonalEffect ? `${seasonalEffect}-` : '';
                                 const animatedPrefix = animationData?.isAnimated ? 'animated-' : '';
-
+                                let code = '';
                                 if (animationData?.isAnimated) {
-                                  return `<!-- Animated SVG Favicons -->
+                                  code = `<!-- Animated SVG Favicons -->
 <link rel="icon" type="image/svg+xml" href="/${animatedPrefix}favicon-32x32.svg">
 <link rel="icon" type="image/svg+xml" sizes="16x16" href="/${animatedPrefix}favicon-16x16.svg">
 <link rel="icon" type="image/svg+xml" sizes="32x32" href="/${animatedPrefix}favicon-32x32.svg">
@@ -393,7 +407,7 @@ export default function Home() {
 <!-- Fallback for older browsers -->
 <link rel="icon" href="/${seasonalPrefix}favicon.ico" sizes="32x32">`;
                                 } else {
-                                  return `<link rel="icon" href="/${seasonalPrefix}favicon.ico" sizes="32x32">
+                                  code = `<link rel="icon" href="/${seasonalPrefix}favicon.ico" sizes="32x32">
 <link rel="icon" type="image/png" sizes="16x16" href="/${seasonalPrefix}favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/${seasonalPrefix}favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="48x48" href="/${seasonalPrefix}favicon-48x48.png">
@@ -401,189 +415,294 @@ export default function Home() {
 <link rel="icon" type="image/png" sizes="192x192" href="/${seasonalPrefix}android-chrome-192x192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="/${seasonalPrefix}android-chrome-512x512.png">`;
                                 }
-                              })()}</pre>
-                            </div>
-                          </div>
+                                navigator.clipboard.writeText(code);
+                              }}
+                              className="absolute top-2 right-2 p-2 bg-[#33ff33]/10 hover:bg-[#33ff33]/20 border border-[#33ff33] rounded transition-colors"
+                              title="Copy to clipboard"
+                            >
+                              <svg className="w-4 h-4 text-[#33ff33]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                              </svg>
+                            </button>
+                            <pre className="text-[#33ff33] text-xs" style={{ fontFamily: 'Courier, monospace' }}>{(() => {
+                              const seasonalPrefix = seasonalEffect ? `${seasonalEffect}-` : '';
+                              const animatedPrefix = animationData?.isAnimated ? 'animated-' : '';
 
-                          {/* Troubleshooting Accordion */}
-                          <Accordion
-                            items={[
-                              {
-                                id: 'troubleshooting',
-                                title: '🔧 Troubleshooting',
-                                defaultOpen: false,
-                                content: (
-                                  <div className="space-y-4 text-sm">
-                                    <div>
-                                      <p className="font-semibold text-gray-900 mb-2">Favicon not showing?</p>
-                                      <ul className="list-disc list-inside ml-2 space-y-1 text-gray-700">
-                                        <li>Check that files are in the correct directory (website root)</li>
-                                        <li>Clear browser cache (Ctrl+F5 or Cmd+Shift+R)</li>
-                                        <li>Verify HTML code is in the &lt;head&gt; section</li>
-                                        <li>Wait a few minutes for changes to propagate</li>
-                                      </ul>
-                                    </div>
-                                    <div>
-                                      <p className="font-semibold text-gray-900 mb-2">Animation not working?</p>
-                                      <ul className="list-disc list-inside ml-2 space-y-1 text-gray-700">
-                                        <li>Ensure you're using a modern browser (Chrome, Firefox, Safari)</li>
-                                        <li>Check that SVG files are being served correctly</li>
-                                        <li>Verify the fallback ICO file is present for older browsers</li>
-                                      </ul>
-                                    </div>
-                                  </div>
-                                )
+                              if (animationData?.isAnimated) {
+                                return `<!-- Animated SVG Favicons -->
+<link rel="icon" type="image/svg+xml" href="/${animatedPrefix}favicon-32x32.svg">
+<link rel="icon" type="image/svg+xml" sizes="16x16" href="/${animatedPrefix}favicon-16x16.svg">
+<link rel="icon" type="image/svg+xml" sizes="32x32" href="/${animatedPrefix}favicon-32x32.svg">
+<link rel="icon" type="image/svg+xml" sizes="48x48" href="/${animatedPrefix}favicon-48x48.svg">
+<link rel="apple-touch-icon" href="/${animatedPrefix}apple-touch-icon.svg">
+<link rel="icon" type="image/svg+xml" sizes="192x192" href="/${animatedPrefix}android-chrome-192x192.svg">
+<link rel="icon" type="image/svg+xml" sizes="512x512" href="/${animatedPrefix}android-chrome-512x512.svg">
+
+<!-- Fallback for older browsers -->
+<link rel="icon" href="/${seasonalPrefix}favicon.ico" sizes="32x32">`;
+                              } else {
+                                return `<link rel="icon" href="/${seasonalPrefix}favicon.ico" sizes="32x32">
+<link rel="icon" type="image/png" sizes="16x16" href="/${seasonalPrefix}favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/${seasonalPrefix}favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="48x48" href="/${seasonalPrefix}favicon-48x48.png">
+<link rel="apple-touch-icon" href="/${seasonalPrefix}apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/${seasonalPrefix}android-chrome-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/${seasonalPrefix}android-chrome-512x512.png">`;
                               }
-                            ]}
-                          />
-
-                          {(seasonalEffect || animationData?.isAnimated) && (
-                            <div className="p-4 bg-blue-50 rounded-lg">
-                              <h4 className="font-semibold text-blue-900 mb-2">
-                                {seasonalEffect && animationData?.isAnimated ? 'Pro Tips' :
-                                  seasonalEffect ? 'Seasonal Favicon Tips' : 'Animated Favicon Tips'}
-                              </h4>
-                              <ul className="text-sm text-blue-800 space-y-1">
-                                {seasonalEffect && (
-                                  <>
-                                    <li>• Consider updating your favicon seasonally to match your brand's theme</li>
-                                    <li>• Keep the original favicon files as backup for when you want to switch back</li>
-                                  </>
-                                )}
-                                {animationData?.isAnimated && (
-                                  <>
-                                    <li>• Animated SVG favicons work in modern browsers (Chrome, Firefox, Safari)</li>
-                                    <li>• The fallback ICO file ensures compatibility with older browsers</li>
-                                    <li>• Animation speed is set to {animationData.speed} seconds - adjust if needed</li>
-                                  </>
-                                )}
-                                <li>• Test your favicon across different browsers and devices</li>
-                              </ul>
-                            </div>
-                          )}
+                            })()}</pre>
+                          </div>
                         </div>
+
+                        {/* Troubleshooting Accordion */}
+                        <Accordion
+                          items={[
+                            {
+                              id: 'troubleshooting',
+                              title: '🔧 Troubleshooting',
+                              defaultOpen: false,
+                              content: (
+                                <div className="space-y-4 text-sm">
+                                  <div>
+                                    <p className="font-semibold text-gray-900 mb-2">Favicon not showing?</p>
+                                    <ul className="list-disc list-inside ml-2 space-y-1 text-gray-700">
+                                      <li>Check that files are in the correct directory (website root)</li>
+                                      <li>Clear browser cache (Ctrl+F5 or Cmd+Shift+R)</li>
+                                      <li>Verify HTML code is in the &lt;head&gt; section</li>
+                                      <li>Wait a few minutes for changes to propagate</li>
+                                    </ul>
+                                  </div>
+                                  <div>
+                                    <p className="font-semibold text-gray-900 mb-2">Animation not working?</p>
+                                    <ul className="list-disc list-inside ml-2 space-y-1 text-gray-700">
+                                      <li>Ensure you're using a modern browser (Chrome, Firefox, Safari)</li>
+                                      <li>Check that SVG files are being served correctly</li>
+                                      <li>Verify the fallback ICO file is present for older browsers</li>
+                                    </ul>
+                                  </div>
+                                </div>
+                              )
+                            }
+                          ]}
+                        />
+
+                        {(seasonalEffect || animationData?.isAnimated) && (
+                          <div className="p-4 bg-blue-50 rounded-lg">
+                            <h4 className="font-semibold text-blue-900 mb-2">
+                              {seasonalEffect && animationData?.isAnimated ? 'Pro Tips' :
+                                seasonalEffect ? 'Seasonal Favicon Tips' : 'Animated Favicon Tips'}
+                            </h4>
+                            <ul className="text-sm text-blue-800 space-y-1">
+                              {seasonalEffect && (
+                                <>
+                                  <li>• Consider updating your favicon seasonally to match your brand's theme</li>
+                                  <li>• Keep the original favicon files as backup for when you want to switch back</li>
+                                </>
+                              )}
+                              {animationData?.isAnimated && (
+                                <>
+                                  <li>• Animated SVG favicons work in modern browsers (Chrome, Firefox, Safari)</li>
+                                  <li>• The fallback ICO file ensures compatibility with older browsers</li>
+                                  <li>• Animation speed is set to {animationData.speed} seconds - adjust if needed</li>
+                                </>
+                              )}
+                              <li>• Test your favicon across different browsers and devices</li>
+                            </ul>
+                          </div>
+                        )}
                       </div>
                     </div>
+                  </div>
 
-                    {/* Generate Another Button */}
-                    <div className="flex justify-center mt-8 pt-8">
-                      <button
-                        onClick={resetToUpload}
-                        className="px-12 py-4 bg-gradient-to-r from-[#FF9500] to-[#FF2D55] text-white rounded-lg font-bold text-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
-                      >
-                        Generate Another Favicon
-                      </button>
+                  {/* Generate Another Button */}
+                  <div className="flex justify-center mt-8 pt-8">
+                    <button
+                      onClick={resetToUpload}
+                      className="px-12 py-4 bg-gradient-to-r from-[#FF9500] to-[#FF2D55] text-white rounded-lg font-bold text-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
+                    >
+                      Generate Another Favicon
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Features */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-24">
+            {[
+              {
+                icon: <Star className="w-6 h-6 text-white" />,
+                bg: "from-yellow-400 to-orange-500",
+                title: "Professional Quality",
+                desc: "High-resolution output for all devices"
+              },
+              {
+                icon: <Sparkles className="w-6 h-6 text-white" />,
+                bg: "from-purple-400 to-pink-500",
+                title: "All Formats",
+                desc: "PNG, ICO, SVG automatically generated"
+              },
+              {
+                icon: <Zap className="w-6 h-6 text-white" />,
+                bg: "from-blue-400 to-cyan-500",
+                title: "Lightning Fast",
+                desc: "Instant client-side processing"
+              },
+              {
+                icon: <Settings className="w-6 h-6 text-white" />,
+                bg: "from-green-400 to-emerald-500",
+                title: "Customizable",
+                desc: "Seasonal effects & animations"
+              }
+            ].map((feature, idx) => (
+              <div key={idx} className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100 text-left">
+                <div className={`w-12 h-12 bg-gradient-to-r ${feature.bg} rounded-xl flex items-center justify-center mb-4 shadow-sm`}>
+                  {feature.icon}
+                </div>
+                <h3 className="font-bold text-gray-900 mb-2">{feature.title}</h3>
+                <p className="text-sm text-gray-600 leading-relaxed">{feature.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* How to Use Guide */}
+          <div className="mb-32">
+            <div className="text-center mb-12">
+              <span className="text-blue-600 font-semibold tracking-wider text-sm uppercase mb-2 block">Get Started</span>
+              <h2 className="text-3xl font-bold text-gray-900">How it works</h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+              {/* Connecting line for desktop */}
+              <div className="hidden md:block absolute top-12 left-1/6 right-1/6 h-0.5 bg-gradient-to-r from-blue-100 via-purple-100 to-green-100 -z-10"></div>
+
+              <div className="relative bg-white/60 backdrop-blur-sm rounded-2xl p-8 border border-white/50 shadow-sm">
+                <div className="w-16 h-16 bg-white rounded-2xl shadow-md flex items-center justify-center mx-auto mb-6 border border-blue-100 relative z-10">
+                  <span className="text-2xl font-bold text-blue-600">1</span>
+                </div>
+                <h3 className="font-bold text-gray-900 mb-3 text-lg">Upload & Crop</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Upload your image and use our smart crop tool to select the perfect square area.
+                </p>
+              </div>
+
+              <div className="relative bg-white/60 backdrop-blur-sm rounded-2xl p-8 border border-white/50 shadow-sm">
+                <div className="w-16 h-16 bg-white rounded-2xl shadow-md flex items-center justify-center mx-auto mb-6 border border-purple-100 relative z-10">
+                  <span className="text-2xl font-bold text-purple-600">2</span>
+                </div>
+                <h3 className="font-bold text-gray-900 mb-3 text-lg">Customize</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Add seasonal effects, adjust colors, remove backgrounds, or create CSS animations.
+                </p>
+              </div>
+
+              <div className="relative bg-white/60 backdrop-blur-sm rounded-2xl p-8 border border-white/50 shadow-sm">
+                <div className="w-16 h-16 bg-white rounded-2xl shadow-md flex items-center justify-center mx-auto mb-6 border border-green-100 relative z-10">
+                  <span className="text-2xl font-bold text-green-600">3</span>
+                </div>
+                <h3 className="font-bold text-gray-900 mb-3 text-lg">Download</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Get all standard favicon sizes in PNG, ICO, and animated SVG formats instantly.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Feature Showcase */}
+          <div className="bg-gray-900 rounded-3xl p-12 text-white overflow-hidden relative mb-32">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl -mr-20 -mt-20"></div>
+            <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl -ml-20 -mb-20"></div>
+
+            <div className="relative z-10">
+              <div className="text-center mb-12">
+                <span className="text-purple-300 font-semibold tracking-wider text-sm uppercase mb-2 block">Capabilities</span>
+                <h2 className="text-3xl font-bold text-white">What You Can Create</h2>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="text-center p-6 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 hover:bg-white/15 transition-colors">
+                  <div className="text-4xl mb-4">❄️</div>
+                  <h3 className="font-bold text-white mb-2">Seasonal Effects</h3>
+                  <p className="text-sm text-gray-300">Winter, Valentine, Halloween, and celebration themes</p>
+                </div>
+
+                <div className="text-center p-6 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 hover:bg-white/15 transition-colors">
+                  <div className="text-4xl mb-4">💓</div>
+                  <h3 className="font-bold text-white mb-2">CSS Animations</h3>
+                  <p className="text-sm text-gray-300">Pulse and rotation effects with customizable speed</p>
+                </div>
+
+                <div className="text-center p-6 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 hover:bg-white/15 transition-colors">
+                  <div className="text-4xl mb-4">🎨</div>
+                  <h3 className="font-bold text-white mb-2">Color Effects</h3>
+                  <p className="text-sm text-gray-300">Adjust colors, opacity, and blend modes</p>
+                </div>
+
+                <div className="text-center p-6 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 hover:bg-white/15 transition-colors">
+                  <div className="text-4xl mb-4">✂️</div>
+                  <h3 className="font-bold text-white mb-2">Background Removal</h3>
+                  <p className="text-sm text-gray-300">Create transparent backgrounds for clean favicons</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          {/* Social Proof / Examples Section */}
+          <div className="mb-32">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">Made with favicon.love</h2>
+              <p className="text-xl text-gray-600">See how we transform logos into perfect favicons</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {/* Example 1 */}
+              <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center text-2xl">
+                    ⚡️
+                  </div>
+                  <ArrowRight className="w-6 h-6 text-gray-300" />
+                  <div className="w-16 h-16 bg-gray-50 rounded-lg flex items-center justify-center border border-gray-200">
+                    <div className="w-8 h-8 bg-blue-500 rounded flex items-center justify-center text-white text-xs font-bold">
+                      ⚡️
                     </div>
                   </div>
                 </div>
+                <h3 className="font-bold text-gray-900 text-center">Clean & Crisp</h3>
+                <p className="text-sm text-gray-500 text-center mt-1">Optimized for small screens</p>
               </div>
-            )}
 
-            {/* Features */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-12 mb-32">
-              <div className="flex flex-col items-center text-center">
-                <div className="w-12 h-12 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mb-3">
-                  <Star className="w-6 h-6 text-white" />
+              {/* Example 2 */}
+              <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-16 h-16 bg-red-100 rounded-lg flex items-center justify-center text-2xl">
+                    ❤️
+                  </div>
+                  <ArrowRight className="w-6 h-6 text-gray-300" />
+                  <div className="w-16 h-16 bg-gray-50 rounded-lg flex items-center justify-center border border-gray-200">
+                    <div className="w-8 h-8 bg-red-500 rounded flex items-center justify-center text-white text-xs font-bold animate-pulse">
+                      ❤️
+                    </div>
+                  </div>
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-1">Professional Quality</h3>
-                <p className="text-sm text-gray-600">High-resolution output</p>
+                <h3 className="font-bold text-gray-900 text-center">Animated</h3>
+                <p className="text-sm text-gray-500 text-center mt-1">Pulse & rotate effects</p>
               </div>
-              <div className="flex flex-col items-center text-center">
-                <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-500 rounded-full flex items-center justify-center mb-3">
-                  <Sparkles className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="font-semibold text-gray-900 mb-1">All Formats</h3>
-                <p className="text-sm text-gray-600">PNG, ICO, SVG</p>
-              </div>
-              <div className="flex flex-col items-center text-center">
-                <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-full flex items-center justify-center mb-3">
-                  <Zap className="w-6 h-6 text-white" />
-                </div>
-                <h3 className="font-semibold text-gray-900 mb-1">Lightning Fast</h3>
-                <p className="text-sm text-gray-600">Client-side processing</p>
-              </div>
-              <div className="flex flex-col items-center text-center">
-                <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center mb-3">
-                  <span className="text-xl">🎨</span>
-                </div>
-                <h3 className="font-semibold text-gray-900 mb-1">Customizable</h3>
-                <p className="text-sm text-gray-600">Effects & animations</p>
-              </div>
-            </div>
 
-            {/* How to Use Guide */}
-            <div className="bg-white/60 backdrop-blur-xl rounded-3xl p-12 mb-32 max-w-5xl mx-auto shadow-sm border border-white/50">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">How to Use favicon.love</h2>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-2xl font-bold text-white">1</span>
+              {/* Example 3 */}
+              <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-16 h-16 bg-purple-100 rounded-lg flex items-center justify-center text-2xl">
+                    ❄️
                   </div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Upload & Crop</h3>
-                  <p className="text-sm text-gray-600">
-                    Upload your image and use the crop tool to select the perfect square area for your favicon.
-                  </p>
-                </div>
-
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-2xl font-bold text-white">2</span>
+                  <ArrowRight className="w-6 h-6 text-gray-300" />
+                  <div className="w-16 h-16 bg-gray-50 rounded-lg flex items-center justify-center border border-gray-200">
+                    <div className="w-8 h-8 bg-purple-500 rounded flex items-center justify-center text-white text-xs font-bold">
+                      ❄️
+                    </div>
                   </div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Customize</h3>
-                  <p className="text-sm text-gray-600">
-                    Add seasonal effects, adjust colors, remove backgrounds, or create CSS animations.
-                  </p>
                 </div>
-
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-2xl font-bold text-white">3</span>
-                  </div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Download</h3>
-                  <p className="text-sm text-gray-600">
-                    Get all standard favicon sizes in PNG, ICO, and animated SVG formats.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Feature Showcase */}
-            <div className="bg-white/60 backdrop-blur-xl rounded-3xl p-12 mb-32 max-w-7xl mx-auto shadow-sm border border-white/50">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">What You Can Create</h2>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl">
-                  <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <span className="text-2xl">❄️</span>
-                  </div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Seasonal Effects</h3>
-                  <p className="text-sm text-gray-600">Winter, Valentine, Halloween, and celebration themes</p>
-                </div>
-
-                <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl">
-                  <div className="w-16 h-16 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <span className="text-2xl">💓</span>
-                  </div>
-                  <h3 className="font-semibold text-gray-900 mb-2">CSS Animations</h3>
-                  <p className="text-sm text-gray-600">Pulse and rotation effects with customizable speed</p>
-                </div>
-
-                <div className="text-center p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl">
-                  <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <span className="text-2xl">🎨</span>
-                  </div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Color Effects</h3>
-                  <p className="text-sm text-gray-600">Adjust colors, opacity, and blend modes</p>
-                </div>
-
-                <div className="text-center p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl">
-                  <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <span className="text-2xl">✂️</span>
-                  </div>
-                  <h3 className="font-semibold text-gray-900 mb-2">Background Removal</h3>
-                  <p className="text-sm text-gray-600">Create transparent backgrounds for clean favicons</p>
-                </div>
+                <h3 className="font-bold text-gray-900 text-center">Seasonal</h3>
+                <p className="text-sm text-gray-500 text-center mt-1">Holiday themes applied instantly</p>
               </div>
             </div>
           </div>
@@ -592,133 +711,37 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-
-
-
-
       </main>
 
       {/* Help & Documentation Section */}
-      {currentStep === 'upload' && (
-        <section className="py-32 bg-gradient-to-br from-gray-50 to-blue-50/30">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">Help & Documentation</h2>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                Everything you need to know about creating perfect favicons
-              </p>
-            </div>
-
-            <div className="space-y-8">
-              {/* Best Practices Accordion */}
-              <div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                  <BookOpen className="w-8 h-8 mr-3 text-blue-600" />
-                  Best Practices & Guidelines
-                </h3>
-                <BestPracticesAccordion />
+      {
+        currentStep === 'upload' && (
+          <section className="py-32 bg-gradient-to-br from-gray-50 to-blue-50/30">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="text-center mb-12">
+                <h2 className="text-3xl font-bold text-gray-900 mb-4">Help & Documentation</h2>
+                <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                  Everything you need to know about creating perfect favicons
+                </p>
               </div>
 
-              {/* Technical Guide Accordion */}
-              <div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                  <Settings className="w-8 h-8 mr-3 text-purple-600" />
-                  Technical Guide & Specifications
-                </h3>
-                <TechnicalGuideAccordion />
-              </div>
-
-              {/* Quick Help Accordion */}
-              <div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                  <HelpCircle className="w-8 h-8 mr-3 text-green-600" />
-                  Quick Help & Troubleshooting
-                </h3>
-                <Accordion
-                  items={[
-                    {
-                      id: 'troubleshooting',
-                      title: '🔧 Common Issues & Solutions',
-                      content: (
-                        <div className="space-y-4">
-                          <div className="bg-yellow-50 p-4 rounded-lg">
-                            <h4 className="font-semibold text-yellow-900 mb-3">Favicon Not Showing?</h4>
-                            <ul className="list-disc list-inside space-y-2 text-sm text-yellow-800">
-                              <li>Check that files are in the correct directory (website root)</li>
-                              <li>Clear browser cache (Ctrl+F5 or Cmd+Shift+R)</li>
-                              <li>Verify HTML code is in the &lt;head&gt; section</li>
-                              <li>Wait a few minutes for changes to propagate</li>
-                              <li>Check file permissions on your web server</li>
-                            </ul>
-                          </div>
-                          <div className="bg-blue-50 p-4 rounded-lg">
-                            <h4 className="font-semibold text-blue-900 mb-3">Animation Not Working?</h4>
-                            <ul className="list-disc list-inside space-y-2 text-sm text-blue-800">
-                              <li>Ensure you're using a modern browser (Chrome, Firefox, Safari)</li>
-                              <li>Check that SVG files are being served correctly</li>
-                              <li>Verify the fallback ICO file is present for older browsers</li>
-                              <li>Test in incognito/private browsing mode</li>
-                            </ul>
-                          </div>
-                          <div className="bg-red-50 p-4 rounded-lg">
-                            <h4 className="font-semibold text-red-900 mb-3">File Upload Issues?</h4>
-                            <ul className="list-disc list-inside space-y-2 text-sm text-red-800">
-                              <li>Ensure image is in supported format (JPG, PNG, GIF, WebP)</li>
-                              <li>Check file size is under 10MB</li>
-                              <li>Try a different image if cropping fails</li>
-                              <li>Refresh the page and try again</li>
-                            </ul>
-                          </div>
-                        </div>
-                      )
-                    },
-                    {
-                      id: 'faq',
-                      title: '❓ Frequently Asked Questions',
-                      content: (
-                        <div className="space-y-4">
-                          <div className="space-y-4">
-                            <div className="border-l-4 border-indigo-500 pl-4">
-                              <h4 className="font-semibold text-gray-900">What image formats are supported?</h4>
-                              <p className="text-sm text-gray-600 mt-1">We support JPG, PNG, GIF, and WebP formats. PNG with transparency works best for favicons.</p>
-                            </div>
-                            <div className="border-l-4 border-indigo-500 pl-4">
-                              <h4 className="font-semibold text-gray-900">Do I need all the different sizes?</h4>
-                              <p className="text-sm text-gray-600 mt-1">Yes! Different devices and browsers use different sizes. We generate all standard sizes for maximum compatibility.</p>
-                            </div>
-                            <div className="border-l-4 border-indigo-500 pl-4">
-                              <h4 className="font-semibold text-gray-900">Will my animated favicon work everywhere?</h4>
-                              <p className="text-sm text-gray-600 mt-1">Animated SVG favicons work in modern browsers. We also provide static PNG/ICO fallbacks for older browsers.</p>
-                            </div>
-                            <div className="border-l-4 border-indigo-500 pl-4">
-                              <h4 className="font-semibold text-gray-900">How often should I update my favicon?</h4>
-                              <p className="text-sm text-gray-600 mt-1">Update seasonally or when rebranding. Keep it consistent with your brand identity for recognition.</p>
-                            </div>
-                            <div className="border-l-4 border-indigo-500 pl-4">
-                              <h4 className="font-semibold text-gray-900">Is this tool free to use?</h4>
-                              <p className="text-sm text-gray-600 mt-1">Yes! favicon.love is completely free to use. No registration or payment required.</p>
-                            </div>
-                          </div>
-                        </div>
-                      )
-                    }
-                  ]}
-                  allowMultiple={true}
-                />
+              <div className="space-y-8">
+                {/* Unified Documentation Section */}
+                <div className="max-w-4xl mx-auto">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-8 flex items-center justify-center">
+                    <BookOpen className="w-8 h-8 mr-3 text-blue-600" />
+                    Help & Documentation
+                  </h3>
+                  <DocumentationAccordion />
+                </div>
               </div>
             </div>
-          </div>
-        </section>
-      )}
+          </section>
+        )
+      }
 
       {/* Footer */}
-      <footer className="bg-white/50 backdrop-blur-xl border-t border-gray-200/50 mt-32">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center text-gray-600">
-            <p>© 2025 favicon.love. Generate beautiful favicons for your website.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

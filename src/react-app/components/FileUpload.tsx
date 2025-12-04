@@ -1,5 +1,5 @@
 import { useState, useRef, DragEvent } from 'react';
-import { Upload, Image as ImageIcon } from 'lucide-react';
+import { Upload, Lock } from 'lucide-react';
 
 interface FileUploadProps {
   onFileSelect: (file: File) => void;
@@ -40,21 +40,18 @@ export default function FileUpload({ onFileSelect, isUploading }: FileUploadProp
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
+    <div className="w-full max-w-xl mx-auto">
       <div
         className={`
-          relative rounded-2xl p-12 text-center transition-all duration-200
-          ${isUploading ? 'opacity-50 pointer-events-none' : 'cursor-pointer'}
-          ${isDragOver ? 'shadow-2xl scale-[1.02]' : 'shadow-lg hover:shadow-xl'}
+          relative group cursor-pointer
+          rounded-3xl p-8 text-center transition-all duration-300 ease-out
+          border-3 border-dashed
+          ${isDragOver
+            ? 'border-blue-500 bg-blue-50/50 scale-[1.02] shadow-2xl'
+            : 'border-gray-300 bg-white hover:border-blue-400 hover:bg-gray-50 hover:shadow-xl'
+          }
+          ${isUploading ? 'opacity-50 pointer-events-none' : ''}
         `}
-        style={{
-          border: '2px dashed transparent',
-          backgroundClip: 'padding-box, border-box',
-          backgroundOrigin: 'padding-box, border-box',
-          backgroundImage: isDragOver
-            ? 'linear-gradient(to right, #FFF5E6, #FFF5E6), linear-gradient(to right, #FF9500, #FF2D55)'
-            : 'linear-gradient(to right, white, white), linear-gradient(to right, #FF9500, #FF2D55)',
-        }}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
@@ -68,39 +65,41 @@ export default function FileUpload({ onFileSelect, isUploading }: FileUploadProp
           className="hidden"
         />
 
-        <div className="flex flex-col items-center space-y-4">
-          <div className={`p-4 rounded-full ${isDragOver ? 'bg-orange-100' : 'bg-gray-100'}`}>
+        <div className="flex flex-col items-center justify-center gap-4">
+          <div className={`
+            p-4 rounded-2xl transition-all duration-300
+            ${isDragOver ? 'bg-blue-100 text-blue-600 scale-110' : 'bg-blue-50 text-blue-600 group-hover:bg-blue-100 group-hover:scale-110'}
+          `}>
             {isUploading ? (
-              <div className="animate-spin">
-                <Upload className="w-8 h-8 text-gray-600" />
-              </div>
+              <div className="animate-spin"><Upload className="w-8 h-8" /></div>
             ) : (
-              <ImageIcon className={`w-8 h-8 ${isDragOver ? 'text-orange-600' : 'text-gray-600'}`} />
+              <Upload className="w-8 h-8" />
             )}
           </div>
 
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              {isUploading ? 'Uploading...' : 'Upload your image'}
+          <div className="space-y-1">
+            <h3 className="text-xl font-bold text-gray-900 group-hover:text-blue-700 transition-colors">
+              Upload Image
             </h3>
-            <p className="text-gray-600 mb-4">
-              Drag and drop an image here, or click to browse
-            </p>
-            <p className="text-sm text-gray-500">
-              Supports PNG, JPG, JPEG, GIF, and SVG files
+            <p className="text-gray-500 text-sm font-medium">
+              Drag & drop or click to browse <span className="opacity-60 font-normal block sm:inline sm:ml-1">(PNG, JPG, SVG)</span>
             </p>
           </div>
 
           {!isUploading && (
-            <button
-              type="button"
-              className="px-6 py-3 bg-gradient-to-r from-[#FF9500] to-[#FF2D55] text-white rounded-lg font-medium hover:shadow-lg transition-all duration-200 transform hover:scale-105"
-            >
-              Choose File
-            </button>
+            <div className="mt-2">
+              <span className="inline-flex items-center px-6 py-2.5 rounded-full bg-gradient-to-r from-[#FF9500] to-[#FF2D55] text-white font-semibold text-sm shadow-lg group-hover:shadow-orange-500/30 transition-all duration-300 transform group-hover:scale-105">
+                Choose File
+              </span>
+            </div>
           )}
         </div>
       </div>
+
+      <p className="mt-6 text-xs text-gray-500 flex items-center justify-center gap-1.5 font-medium">
+        <Lock className="w-3.5 h-3.5 text-gray-400" />
+        Secure & Private: Images are processed locally and never leave your browser.
+      </p>
     </div>
   );
 }

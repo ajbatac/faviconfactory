@@ -1,0 +1,2 @@
+ALTER TABLE "favicon_submissions" ALTER COLUMN "created_at" SET DEFAULT '2025-12-07T02:50:43.861Z';--> statement-breakpoint
+ALTER TABLE "favicon_submissions" ADD COLUMN "clicks_count" integer DEFAULT 0 NOT NULL;

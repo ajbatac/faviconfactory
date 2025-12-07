@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Zap, Star, Sparkles, Download, BookOpen, Settings, ArrowRight } from 'lucide-react';
+import { Zap, Star, Sparkles, Download, BookOpen, Settings, ArrowRight, Check } from 'lucide-react';
 import FileUpload from '@/react-app/components/FileUpload';
 import ImageCropper from '@/react-app/components/ImageCropper';
 import Footer from '@/react-app/components/Footer';
 import { downloadAnimatedSVG, generateMultipleSizes, type AnimationConfig } from '@/react-app/utils/svgAnimations';
 import Accordion, { DocumentationAccordion } from '@/react-app/components/Accordion';
+import Logo from '@/react-app/components/Logo';
 
 type Step = 'upload' | 'crop' | 'results';
 
@@ -14,6 +15,38 @@ export default function Home() {
   const [faviconData, setFaviconData] = useState<string>('');
   const [seasonalEffect, setSeasonalEffect] = useState<'snow' | 'valentine' | 'halloween' | 'celebration' | null>(null);
   const [animationData, setAnimationData] = useState<any>(null);
+  const [copied, setCopied] = useState(false);
+  const [showPromotion, setShowPromotion] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [email, setEmail] = useState('');
+  const [websiteUrl, setWebsiteUrl] = useState('');
+  const [agreed, setAgreed] = useState(false);
+  const [submissionStatus, setSubmissionStatus] = useState<'idle' | 'success' | 'error'>('idle');
+
+  const handlePromotionSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!agreed) return;
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch('/api/submit-favicon', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, websiteUrl, faviconImage: faviconData })
+      });
+
+      if (response.ok) {
+        setSubmissionStatus('success');
+        setShowPromotion(false); // Optionally hide or keep showing success message
+      } else {
+        setSubmissionStatus('error');
+      }
+    } catch (error) {
+      setSubmissionStatus('error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleFileSelect = (file: File) => {
     setSelectedFile(file);
@@ -90,6 +123,7 @@ export default function Home() {
     // Also create and download the ICO file
     setTimeout(() => {
       downloadFavicon(32, `${seasonalPrefix}favicon.ico`);
+      setShowPromotion(true);
     }, sizes.length * 200);
   };
 
@@ -141,20 +175,15 @@ export default function Home() {
               <div className="inline-flex items-center gap-3 px-4 py-3 bg-white rounded-full border border-gray-200/50" style={{
                 boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.06), inset 0 -1px 2px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.05)'
               }}>
-                <img
-                  src="/faviconlove.png"
-                  alt="favicon.love logo"
-                  className="h-10 w-auto"
-                />
+                <Logo showText={false} className="h-10 w-auto" />
               </div>
 
-              <div className="max-w-2xl mx-auto space-y-4">
+              <div className="max-w-6xl mx-auto space-y-4">
                 <h1 className="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight">
                   Professional favicons in seconds.
                 </h1>
-                <p className="text-lg text-gray-600 leading-relaxed max-w-xl mx-auto">
-                  Transform any image into stunning icons with seasonal flair and animations.
-                  <span className="block sm:inline"> Completely free, all in one place.</span>
+                <p className="text-base text-gray-600 leading-relaxed max-w-5xl mx-auto">
+                  Transform any image into stunning, professional favicons with seasonal flair and custom animations. Completely free and all in one place.
                 </p>
               </div>
             </div>
@@ -252,6 +281,20 @@ export default function Home() {
                         </div>
                       )}
                     </div>
+
+                    <div className="mt-6 bg-white/10 border border-white/20 rounded-lg p-4 backdrop-blur-sm">
+                      <div className="flex items-start gap-3">
+                        <div className="shrink-0 text-xl">⚠️</div>
+                        <div className="text-sm text-green-50 space-y-1">
+                          <p className="font-semibold text-white">Important: You will receive 7 files</p>
+                          <p>
+                            Clicking download will simultaneously download all 7 files.
+                            If nothing happens, your browser (especially Chrome) might be blocking multiple downloads.
+                            Please look for a blocked popup icon in your address bar and grant a one-time approval.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -260,61 +303,64 @@ export default function Home() {
                   <div className="text-center mb-8">
                     <h3 className="text-lg font-bold text-gray-900 mb-3">Preview</h3>
                     <div className="inline-block bg-gray-50 rounded-lg p-8">
-                      <div className="flex items-center justify-center space-x-6 mb-8">
-                        {[16, 32, 48, 64].map((size) => (
-                          <div key={size} className="text-center">
-                            <div
-                              className="border border-gray-300 rounded mb-2 mx-auto"
-                              style={{
-                                width: `${Math.min(size, 48)}px`,
-                                height: `${Math.min(size, 48)}px`,
-                                backgroundImage: `
-                                    linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%, #f0f0f0),
-                                    linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%, #f0f0f0)
-                                  `,
-                                backgroundSize: '4px 4px',
-                                backgroundPosition: '0 0, 2px 2px',
-                              }}
-                            >
+                      <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-12">
+                        {/* Individual Sizes */}
+                        <div className="flex items-center justify-center space-x-6">
+                          {[16, 32, 48, 64].map((size) => (
+                            <div key={size} className="text-center">
+                              <div
+                                className="border border-gray-300 rounded mb-2 mx-auto"
+                                style={{
+                                  width: `${Math.min(size, 48)}px`,
+                                  height: `${Math.min(size, 48)}px`,
+                                  backgroundImage: `
+                                        linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%, #f0f0f0),
+                                        linear-gradient(45deg, #f0f0f0 25%, transparent 25%, transparent 75%, #f0f0f0 75%, #f0f0f0)
+                                      `,
+                                  backgroundSize: '4px 4px',
+                                  backgroundPosition: '0 0, 2px 2px',
+                                }}
+                              >
+                                <img
+                                  src={faviconData}
+                                  alt={`${size}x${size} preview`}
+                                  className="w-full h-full object-cover rounded"
+                                />
+                              </div>
+                              <div className="text-xs text-gray-600">{size}×{size}</div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Browser Preview */}
+                        <div className="bg-white rounded-lg shadow-md overflow-hidden w-full max-w-xs md:max-w-sm">
+                          {/* Browser Tab Bar */}
+                          <div className="bg-gray-100 px-2 pt-2 flex items-end gap-1 border-b border-gray-200">
+                            {/* Active Tab (User's) */}
+                            <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-t-lg border-t border-x border-gray-200 shadow-sm relative z-10 -mb-px">
                               <img
                                 src={faviconData}
-                                alt={`${size}x${size} preview`}
-                                className="w-full h-full object-cover rounded"
+                                alt="favicon preview"
+                                className="w-4 h-4 rounded-sm"
                               />
+                              <span className="text-xs text-gray-700 font-medium">Your Favicon</span>
                             </div>
-                            <div className="text-xs text-gray-600">{size}×{size}</div>
+                            {/* Inactive Tab (Ours) */}
+                            <div className="flex items-center gap-2 px-3 py-2 rounded-t-lg hover:bg-gray-200 transition-colors cursor-default opacity-60 hover:opacity-100">
+                              <img src="/favicon.love.logo.small.png" alt="favicon.love" className="w-4 h-4" />
+                              <span className="text-xs text-gray-600">favicon.love</span>
+                            </div>
                           </div>
-                        ))}
-                      </div>
-
-                      {/* Browser Preview */}
-                      <div className="bg-white rounded-lg shadow-md overflow-hidden max-w-md mx-auto">
-                        {/* Browser Tab Bar */}
-                        <div className="bg-gray-100 px-2 py-1 flex items-center gap-1 border-b border-gray-200">
-                          <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-t border-t border-x border-gray-200">
-                            <img
-                              src={faviconData}
-                              alt="favicon preview"
-                              className="w-4 h-4"
-                            />
-                            <span className="text-xs text-gray-700">favicon.love</span>
-                          </div>
-                          <div className="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-t">
-                            <div className="w-4 h-4 bg-gray-300 rounded-sm"></div>
-                            <span className="text-xs text-gray-400">New Tab</span>
-                          </div>
-                        </div>
-                        {/* Browser Content */}
-                        <div className="bg-white h-12 flex items-center justify-center">
-                          <span className="text-2xl font-bold text-gray-300">favicon.love</span>
+                          {/* Browser Content */}
+                          <div className="bg-white h-16 w-full"></div>
                         </div>
                       </div>
                     </div>
                   </div>
 
                   {/* Download Options */}
-                  <div className="space-y-6">
-                    <div className="text-center space-y-4">
+                  <div className="space-y-12">
+                    <div className="text-center space-y-6">
                       {/* Static Download */}
                       <div>
                         <button
@@ -322,12 +368,89 @@ export default function Home() {
                           className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-bold text-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 flex items-center space-x-3 mx-auto"
                         >
                           <Download className="w-6 h-6" />
-                          <span>Download Static Favicons</span>
+                          <span>Download All Static Favicons</span>
                         </button>
-                        <p className="text-gray-600 text-sm mt-2">
-                          Downloads static PNG/ICO files (16×16, 32×32, 48×48, 180×180, 192×192, 512×512, favicon.ico)
+                        <p className="text-gray-600 text-sm mt-3 max-w-lg mx-auto">
+                          Get the complete package containing all standard sizes (16x16 through 512x512) and the essential favicon.ico file in one click.
                         </p>
                       </div>
+
+                      {/* Promotion Card */}
+                      {showPromotion && submissionStatus !== 'success' && (
+                        <div className="bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-100 rounded-xl p-8 max-w-lg mx-auto shadow-lg animate-in fade-in slide-in-from-bottom-4 duration-500">
+                          <div className="text-center mb-6">
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">Showcase Your Website! 🚀</h3>
+                            <p className="text-sm text-gray-600">
+                              Add your newly minted favicon to our gallery and share it to the world. Promote your website too!
+                            </p>
+                          </div>
+
+                          <form onSubmit={handlePromotionSubmit} className="space-y-4 text-left">
+                            <div>
+                              <label htmlFor="website" className="block text-sm font-medium text-gray-700 mb-1">Website URL</label>
+                              <input
+                                type="url"
+                                id="website"
+                                required
+                                placeholder="https://your-website.com"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                value={websiteUrl}
+                                onChange={(e) => setWebsiteUrl(e.target.value)}
+                              />
+                            </div>
+                            <div>
+                              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                              <input
+                                type="email"
+                                id="email"
+                                required
+                                placeholder="you@example.com"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                              />
+                            </div>
+                            <div className="flex items-start gap-3">
+                              <input
+                                type="checkbox"
+                                id="terms"
+                                className="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                checked={agreed}
+                                onChange={(e) => setAgreed(e.target.checked)}
+                              />
+                              <label htmlFor="terms" className="text-sm text-gray-600">
+                                I agree to the <a href="/terms-of-service" className="text-blue-600 hover:underline">Terms</a> and <a href="/privacy-policy" className="text-blue-600 hover:underline">Privacy Policy</a>
+                              </label>
+                            </div>
+                            <button
+                              type="submit"
+                              disabled={!agreed || isSubmitting}
+                              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                            >
+                              {isSubmitting ? 'Submitting...' : 'Submit to Gallery'}
+                            </button>
+                          </form>
+                          {submissionStatus === 'error' && (
+                            <p className="text-red-500 text-sm mt-3 text-center">Something went wrong. Please try again.</p>
+                          )}
+                        </div>
+                      )}
+
+                      {submissionStatus === 'success' && (
+                        <div className="bg-green-50 border border-green-200 rounded-xl p-8 max-w-lg mx-auto text-center shadow animate-in fade-in zoom-in duration-300">
+                          <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Check className="w-6 h-6 text-green-600" />
+                          </div>
+                          <h3 className="text-xl font-bold text-gray-900 mb-2">Submitted Successfully!</h3>
+                          <p className="text-gray-600 mb-6">Your site is fast-tracked and is now live in the gallery.</p>
+                          <a
+                            href="/gallery"
+                            className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-green-700 bg-green-100 hover:bg-green-200 transition-colors"
+                          >
+                            View in Favicon Gallery <ArrowRight className="ml-2 w-4 h-4" />
+                          </a>
+                        </div>
+                      )}
 
                       {/* Animated Download */}
                       {animationData?.isAnimated && (
@@ -337,35 +460,63 @@ export default function Home() {
                             className="px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg font-bold text-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 flex items-center space-x-3 mx-auto"
                           >
                             <Sparkles className="w-6 h-6" />
-                            <span>Download Animated SVG Favicons</span>
+                            <span>Download All Animated SVGs</span>
                           </button>
-                          <p className="text-gray-600 text-sm mt-2">
-                            Downloads animated SVG files with {animationData.type} effect ({animationData.speed}s speed)
+                          <p className="text-gray-600 text-sm mt-3 max-w-lg mx-auto">
+                            Get the complete set of animated SVG files with your selected {animationData.type} effect ({animationData.speed}s speed).
                           </p>
                         </div>
                       )}
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {(() => {
-                        const seasonalPrefix = seasonalEffect ? `${seasonalEffect}-` : '';
-                        return [
-                          { size: 16, filename: `${seasonalPrefix}favicon-16x16.png`, label: '16×16 PNG' },
-                          { size: 32, filename: `${seasonalPrefix}favicon-32x32.png`, label: '32×32 PNG' },
-                          { size: 48, filename: `${seasonalPrefix}favicon-48x48.png`, label: '48×48 PNG' },
-                          { size: 180, filename: `${seasonalPrefix}apple-touch-icon.png`, label: 'Apple Touch Icon' },
-                          { size: 192, filename: `${seasonalPrefix}android-chrome-192x192.png`, label: 'Android Chrome 192×192' },
-                          { size: 512, filename: `${seasonalPrefix}android-chrome-512x512.png`, label: 'Android Chrome 512×512' },
-                        ].map((item) => (
-                          <button
-                            key={item.size}
-                            onClick={() => downloadFavicon(item.size, item.filename)}
-                            className="p-3 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium transition-colors text-center"
-                          >
-                            {item.label}
-                          </button>
-                        ));
-                      })()}
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                        <div className="w-full border-t border-gray-200"></div>
+                      </div>
+                      <div className="relative flex justify-center">
+                        <span className="bg-white px-4 text-sm font-medium text-gray-500">Or download individual files</span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="text-center mb-6">
+                        <h4 className="text-gray-900 font-semibold mb-1">Specific Sizes</h4>
+                        <p className="text-sm text-gray-500">Download only the specific files you need for your project</p>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {(() => {
+                          const seasonalPrefix = seasonalEffect ? `${seasonalEffect}-` : '';
+                          return [
+                            { size: 16, filename: `${seasonalPrefix}favicon-16x16.png`, label: '16×16 PNG', desc: 'Classic favicon' },
+                            { size: 32, filename: `${seasonalPrefix}favicon-32x32.png`, label: '32×32 PNG', desc: 'Modern taskbar' },
+                            { size: 48, filename: `${seasonalPrefix}favicon-48x48.png`, label: '48×48 PNG', desc: 'Windows tile' },
+                            { size: 180, filename: `${seasonalPrefix}apple-touch-icon.png`, label: 'Apple Touch Icon', desc: 'iOS home screen' },
+                            { size: 192, filename: `${seasonalPrefix}android-chrome-192x192.png`, label: 'Android 192', desc: 'Android home screen' },
+                            { size: 512, filename: `${seasonalPrefix}android-chrome-512x512.png`, label: 'Android 512', desc: 'PWA splash screen' },
+                          ].map((item) => (
+                            <button
+                              key={item.size}
+                              onClick={() => downloadFavicon(item.size, item.filename)}
+                              className="flex items-center p-3 bg-white border border-gray-200 hover:border-blue-400 hover:shadow-md rounded-xl transition-all text-left group w-full"
+                            >
+                              <div className="w-12 h-12 bg-gray-50 rounded-lg flex items-center justify-center mr-4 border border-gray-100 group-hover:border-blue-100 shrink-0 overflow-hidden">
+                                <img
+                                  src={faviconData}
+                                  alt={item.label}
+                                  className="w-8 h-8 object-contain"
+                                />
+                              </div>
+                              <div className="min-w-0">
+                                <div className="font-semibold text-gray-900 text-sm group-hover:text-blue-600 transition-colors">{item.label}</div>
+                                <div className="text-xs text-gray-500 truncate">{item.filename}</div>
+                              </div>
+                              <div className="ml-auto pl-2 text-gray-300 group-hover:text-blue-500 transition-colors">
+                                <Download className="w-4 h-4" />
+                              </div>
+                            </button>
+                          ));
+                        })()}
+                      </div>
                     </div>
                   </div>
 
@@ -416,13 +567,24 @@ export default function Home() {
 <link rel="icon" type="image/png" sizes="512x512" href="/${seasonalPrefix}android-chrome-512x512.png">`;
                                 }
                                 navigator.clipboard.writeText(code);
+                                setCopied(true);
+                                setTimeout(() => setCopied(false), 2000);
                               }}
-                              className="absolute top-2 right-2 p-2 bg-[#33ff33]/10 hover:bg-[#33ff33]/20 border border-[#33ff33] rounded transition-colors"
+                              className="absolute top-2 right-2 p-2 bg-[#33ff33]/10 hover:bg-[#33ff33]/20 border border-[#33ff33] rounded transition-colors flex items-center gap-2"
                               title="Copy to clipboard"
                             >
-                              <svg className="w-4 h-4 text-[#33ff33]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                              </svg>
+                              {copied ? (
+                                <>
+                                  <svg className="w-4 h-4 text-[#33ff33]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                  </svg>
+                                  <span className="text-xs font-medium text-[#33ff33]">Copied!</span>
+                                </>
+                              ) : (
+                                <svg className="w-4 h-4 text-[#33ff33]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                                </svg>
+                              )}
                             </button>
                             <pre className="text-[#33ff33] text-xs" style={{ fontFamily: 'Courier, monospace' }}>{(() => {
                               const seasonalPrefix = seasonalEffect ? `${seasonalEffect}-` : '';

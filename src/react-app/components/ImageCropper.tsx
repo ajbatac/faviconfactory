@@ -398,12 +398,12 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
     <div className="w-full max-w-4xl mx-auto">
       <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
         <div className="p-6 border-b">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-1">Customize Your Favicon</h2>
               <p className="text-gray-600">Use the tools below to perfect your favicon</p>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 self-start sm:self-auto">
               <button
                 onClick={resetAll}
                 className="px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors flex items-center space-x-2"
@@ -421,10 +421,10 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
           </div>
 
           {/* Customization Tabs */}
-          <div className="flex space-x-1 bg-gray-100 rounded-lg p-1">
+          <div className="flex space-x-1 bg-gray-100 rounded-lg p-1 overflow-x-auto no-scrollbar">
             <button
               onClick={() => setActiveTab('crop')}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-all ${activeTab === 'crop'
+              className={`flex-shrink-0 whitespace-nowrap flex items-center space-x-2 px-4 py-2 rounded-md transition-all ${activeTab === 'crop'
                 ? 'bg-white shadow-sm text-blue-600'
                 : 'text-gray-600 hover:text-gray-800'
                 }`}
@@ -434,7 +434,7 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
             </button>
             <button
               onClick={() => setActiveTab('position')}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-all ${activeTab === 'position'
+              className={`flex-shrink-0 whitespace-nowrap flex items-center space-x-2 px-4 py-2 rounded-md transition-all ${activeTab === 'position'
                 ? 'bg-white shadow-sm text-blue-600'
                 : 'text-gray-600 hover:text-gray-800'
                 }`}
@@ -444,7 +444,7 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
             </button>
             <button
               onClick={() => setActiveTab('background')}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-all ${activeTab === 'background'
+              className={`flex-shrink-0 whitespace-nowrap flex items-center space-x-2 px-4 py-2 rounded-md transition-all ${activeTab === 'background'
                 ? 'bg-white shadow-sm text-blue-600'
                 : 'text-gray-600 hover:text-gray-800'
                 }`}
@@ -454,7 +454,7 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
             </button>
             <button
               onClick={() => setActiveTab('color')}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-all ${activeTab === 'color'
+              className={`flex-shrink-0 whitespace-nowrap flex items-center space-x-2 px-4 py-2 rounded-md transition-all ${activeTab === 'color'
                 ? 'bg-white shadow-sm text-blue-600'
                 : 'text-gray-600 hover:text-gray-800'
                 }`}
@@ -464,7 +464,7 @@ export default function ImageCropper({ imageFile, onCropComplete, onAnimationCom
             </button>
             <button
               onClick={() => setActiveTab('seasonal')}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-all ${activeTab === 'seasonal'
+              className={`flex-shrink-0 whitespace-nowrap flex items-center space-x-2 px-4 py-2 rounded-md transition-all ${activeTab === 'seasonal'
                 ? 'bg-white shadow-sm text-blue-600'
                 : 'text-gray-600 hover:text-gray-800'
                 }`}

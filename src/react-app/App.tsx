@@ -7,11 +7,14 @@ import PrivacyPolicy from '@/react-app/pages/PrivacyPolicy';
 import TermsOfService from '@/react-app/pages/TermsOfService';
 import ContactSupport from '@/react-app/pages/ContactSupport';
 
+import Gallery from '@/react-app/pages/Gallery';
+
 export default function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/gallery" element={<Gallery />} />
         <Route path="/features" element={<Features />} />
         <Route path="/seasonal-themes" element={<SeasonalThemes />} />
         <Route path="/animations" element={<Animations />} />

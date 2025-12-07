@@ -15,6 +15,12 @@ Generate professional, modern favicons from any image — entirely client-side. 
 - Polished front page with How-To, feature showcase, best practices, and technical specs
 - Collapsible accordion documentation for easy scanning (Best Practices, Technical Guide, Quick Help/FAQ)
 
+### Latest Updates (v1.1.0)
+- **UI Refinements:** Cleaner interface with improved spacing and removed heavy borders.
+- **Mobile Experience:** Optimized image cropping and controls for touch devices.
+- **Security & Performance:** Core dependency updates (React 19, Vite) and resolved vulnerability warnings.
+- **New Features:** Added publicly accessible Changelog and RSS feed for updates.
+
 ## What’s Included (Accomplishments)
 
 ### Core Generation

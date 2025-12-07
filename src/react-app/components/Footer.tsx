@@ -45,7 +45,11 @@ export default function Footer() {
                 </div>
 
                 <div className="border-t border-gray-200 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-                    <p className="text-gray-500 text-sm">© 2025 favicon.love. All rights reserved.</p>
+                    <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4">
+                        <p className="text-gray-500 text-sm">© 2025 favicon.love. All rights reserved.</p>
+                        <span className="hidden sm:inline text-gray-300">|</span>
+                        <Link to="/changelog" onClick={scrollToTop} className="text-gray-400 text-sm hover:text-blue-600 transition-colors">v1.1.0</Link>
+                    </div>
                     <div className="flex gap-6">
                         <a href="#" className="text-gray-400 hover:text-gray-600 transition-colors">
                             <span className="sr-only">Twitter</span>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+  <title>FavIconFactory Changelog</title>
+  <link>https://favicon.love/changelog</link>
+  <description>Stay up to date with the latest improvements and features from FavIconFactory.</description>
+  <language>en-us</language>
+  <lastBuildDate>Sat, 06 Dec 2025 23:00:00 -0500</lastBuildDate>
+  <atom:link href="https://favicon.love/rss.xml" rel="self" type="application/rss+xml" />
+  <item>
+    <title>v1.1.0 — Visual Refinements &amp; Mobile Polish</title>
+    <link>https://favicon.love/changelog</link>
+    <guid isPermaLink="false">v1.1.0</guid>
+    <pubDate>Sat, 06 Dec 2025 00:00:00 -0500</pubDate>
+    <description><![CDATA[
+<h3>Enhanced UI Experience</h3>
+<p>We've cleaned up the interface significantly. Heavy borders have been removed in favor of better spacing and cleaner lines, giving the entire application a more modern and breathable feel.</p>
+
+<h3>Mobile Improvements</h3>
+<p>Creating favicons on the go is now easier than ever. We've optimized the Image Cropper and its controls specifically for mobile devices, ensuring a smooth experience whether you're on a phone or tablet.</p>
+
+<h3>Performance &amp; Security</h3>
+<p>Under the hood, we've updated our core engine to the latest secure versions. This ensures faster load times and better protection for your privacy while generating icons locally.</p>
+]]></description>
+  </item>
+  <item>
+    <title>v1.0.0 — Initial Release</title>
+    <link>https://favicon.love/changelog</link>
+    <guid isPermaLink="false">v1.0.0</guid>
+    <pubDate>Wed, 20 Nov 2024 00:00:00 -0500</pubDate>
+    <description><![CDATA[
+<p>FavIconFactory is live! Generate professional, pixel-perfect favicons entirely in your browser without uploading your files. Features include smart cropping, seasonal effects, and automated format generation.</p>
+]]></description>
+  </item>
+</channel>
+</rss>

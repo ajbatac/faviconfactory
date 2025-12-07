@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://favicon.love/sitemap.xml
